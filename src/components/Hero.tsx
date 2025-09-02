@@ -2,9 +2,10 @@ import React from "react";
 
 const Hero: React.FC = () => {
   return (
-    <div className=" py-20 text-center">
-      <h2 className="text-4xl font-bold text-gray-800">Welcome to eHealthApp</h2>
-      
+    <div className='flex  '>
+    <div className="p-8 flex-1 min-h-screen ">
+      <h2 className="text-4xl font-bold">Welcome to eHealthApp</h2>
+      </div>
     </div>  
   );
 };
