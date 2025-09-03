@@ -1,15 +1,33 @@
 import React from "react";
-import { FaBell, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaBell, FaUserCircle } from "react-icons/fa";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  toggleSidebar: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   return (
-    <header className="bg-gray-800 shadow-md">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-white">eHealthApp</h1>
+    <header className="bg-[rgb(13,152,186)]">
+      <div className="px-6 py-4 flex justify-between items-center">
+        {/* Left side: Hamburger + App Name */}
+        <div className="flex items-center space-x-4 text-white">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md hover:bg-[rgb(0,109,111)]"
+          >
+            <FaBars size={20} />
+          </button>
+          <h1 className="text-xl font-bold">eHealthApp</h1>
+        </div>
 
-        <div className="flex items-center space-x-6 text-white text-xl">
-          <FaBell className="cursor-pointer hover:text-gray-400"/>
-          <FaUserCircle className="cursor-pointer hover:text-gray-400"/>
+        {/* Right side: Icons */}
+        <div className="flex items-center space-x-4 text-white text-xl">
+          <div className="p-2 rounded-full cursor-pointer hover:bg-[rgb(0,109,111)]">
+            <FaBell />
+          </div>
+          <div className="p-2 rounded-full cursor-pointer hover:bg-[rgb(0,109,111)]">
+            <FaUserCircle />
+          </div>
         </div>
       </div>
     </header>
