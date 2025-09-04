@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import Header from "./components/Header";
-import Hero from "./components/Hero";
+import Bargraph from "./components/Bargraph";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
+// import Calender from "./components/Calender";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -22,7 +23,8 @@ function App() {
 
         {/* Main content */}
         <main className="flex-grow p-4">
-          <Hero />
+          
+          <Bargraph />
         </main>
       </div>
 
