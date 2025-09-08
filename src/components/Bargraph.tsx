@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Title from "./Title"; 
+import Dropdown from  "./Dropdown";
 import Calender from "./Calender";
 
 const data = [
@@ -24,10 +25,12 @@ const Bargraph = () => {
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 max-w-4xl mx-auto">
       
-      <div className='flex justify-between items-center mb-2'>
+      <div className='flex justify-between items-center'>
       <Title text="Financial Overview" />
-        
-      <Calender />
+      <div className='flex items-center gap-4'>
+        <Dropdown />
+       <Calender />
+      </div>
       </div>
       {/* Subtitle */}
       <p className="text-black-500 text-sm mb-4 text-center">

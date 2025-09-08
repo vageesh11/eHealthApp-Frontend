@@ -6,7 +6,7 @@ interface TitleProps {
 
 const Title: React.FC<TitleProps> = ({ text }) => {
   return (
-    <h2 className="text-xl font-bold mb-2">
+    <h2 className="text-xl font-bold mb-5">
       {text}
     </h2>
   );
