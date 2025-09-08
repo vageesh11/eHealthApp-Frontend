@@ -5,7 +5,7 @@ const Calendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 mb-5">
       {/* Calendar Icon */}
       <label className="cursor-pointer flex items-center gap-2 text-gray-800 hover:bg-[rgb(152,215,216)] p-2 rounded">
         <FaRegCalendarAlt size={20} />
