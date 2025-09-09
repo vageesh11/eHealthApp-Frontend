@@ -10,16 +10,16 @@ const Dropdown: React.FC = () => {
 
   const doctors: Record<string, string[]> = {
     "Hospital 1": ["Doctor 1", "Doctor 2", "Doctor 3", "Doctor 4", "Doctor 5"],
-    "Hospital 2": ["Doctor 1", "Doctor 3", "Doctor 4", "Doctor 4", "Doctor 5"],
+    "Hospital 2": ["Doctor 1", "Doctor 2", "Doctor 3", "Doctor 4", "Doctor 5"],
     "Hospital 3": ["Doctor 1", "Doctor 2", "Doctor 3", "Doctor 4", "Doctor 5"],
   };
 
   const nurses: Record<string, string[]> = {
     "Doctor 1": ["Nurse 1", "Nurse 2", "Nurse 3"],
     "Doctor 2": ["Nurse 1", "Nurse 2", "Nurse 3"],
-    "Doctor 3": ["Nurse 1", "Nurse 2", "Nurse 3"],
+    "Doctor 3": ["Nurse 1"],
     "Doctor 4": ["Nurse 1", "Nurse 2", "Nurse 3"],
-    "Doctor 5": ["Nurse 1", "Nurse 2", "Nurse 3"],
+    "Doctor 5": ["Nurse 1"],
   };
 
   const [openHospital, setOpenHospital] = useState(false);
@@ -89,7 +89,15 @@ const Dropdown: React.FC = () => {
                   key={doctor}
                   onClick={() => {
                     setSelectedDoctor(doctor);
+                    //if doctor has only one nurse auto select
+                    const nurseList = nurses[doctor] || [];
+                    if (nurseList.length === 1) {
+                      setSelectedNurse(nurseList[0]);
+                      setOpenNurse(false);
+                    }else{
                     setSelectedNurse("");
+                    setOpenNurse(false);
+                    }
                     setOpenDoctor(false);
                   }}
                   className="cursor-pointer hover:bg-[rgb(0,109,111)] hover:text-white px-3 py-2"
@@ -103,7 +111,7 @@ const Dropdown: React.FC = () => {
       )}
 
       {/* Nurse Dropdown */}
-      {selectedDoctor && (
+      {selectedDoctor && nurses[selectedDoctor]?.length > 1 && (
         <div className="relative">
           <button
             onClick={() => setOpenNurse(!openNurse)}
@@ -132,6 +140,12 @@ const Dropdown: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {selectedDoctor && nurses[selectedDoctor]?.length === 1 && (
+        <div className="border rounded-lg w-39 py-0.3 px-1 text-sm flex items-center">
+        {selectedNurse}
         </div>
       )}
     </div>
