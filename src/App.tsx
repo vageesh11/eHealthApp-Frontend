@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Bargraph from "./components/Bargraph";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
+import MultilevelDropdown from "./components/MultilevelDropdown";
 // import Calender from "./components/Calender";
 
 function App() {
@@ -23,11 +24,17 @@ function App() {
 
         {/* Main content */}
         <main className="flex-grow p-4">
-          
+          {/* Bargraph at the top */}
           <Bargraph />
+
+          {/* MultilevelDropdown below Bargraph */}
+          <div className="mt-6 flex justify-center">
+            <MultilevelDropdown />
+          </div>
         </main>
       </div>
 
+      {/* Footer at bottom */}
       <Footer />
     </div>
   );
