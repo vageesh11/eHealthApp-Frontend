@@ -4,10 +4,13 @@ import Bargraph from "./components/Bargraph";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
 import MultilevelDropdown from "./components/MultilevelDropdown";
+import Searchbar from "./components/Searchbar";
 // import Calender from "./components/Calender";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [searchValue, setSearchValue] = useState("");
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -28,8 +31,13 @@ function App() {
           <Bargraph />
 
           {/* MultilevelDropdown below Bargraph */}
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 gap-6 flex justify-center">
             <MultilevelDropdown />
+            <Searchbar 
+            placeholder="Search anything..." 
+            value={searchValue}
+            onChange={setSearchValue}
+            />
           </div>
         </main>
       </div>
