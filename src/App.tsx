@@ -3,10 +3,14 @@ import Header from "./components/Header";
 import Bargraph from "./components/Bargraph";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
+import MultilevelDropdown from "./components/MultilevelDropdown";
+import Searchbar from "./components/Searchbar";
 // import Calender from "./components/Calender";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [searchValue, setSearchValue] = useState("");
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -23,11 +27,22 @@ function App() {
 
         {/* Main content */}
         <main className="flex-grow p-4">
-          
+          {/* Bargraph at the top */}
           <Bargraph />
+
+          {/* MultilevelDropdown below Bargraph */}
+          <div className="mt-6 gap-6 flex justify-center">
+            <MultilevelDropdown />
+            <Searchbar 
+            placeholder="Search anything..." 
+            value={searchValue}
+            onChange={setSearchValue}
+            />
+          </div>
         </main>
       </div>
 
+      {/* Footer at bottom */}
       <Footer />
     </div>
   );
