@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaChevronDown, FaSearch } from "react-icons/fa";
+import { FaChevronDown} from "react-icons/fa";
 import Searchbar from "./Searchbar";
 
 const Dropdown: React.FC = () => {

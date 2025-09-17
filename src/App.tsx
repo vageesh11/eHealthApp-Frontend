@@ -5,44 +5,88 @@ import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
 import MultilevelDropdown from "./components/MultilevelDropdown";
 import Searchbar from "./components/Searchbar";
-// import Calender from "./components/Calender";
+import Login from "./components/Login";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const [searchValue, setSearchValue] = useState("");
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
+  //Login
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
+
+  
+  const [isSecondLoginOpen, setIsSecondLoginOpen] = useState(false);
+  const [adminCredentials, setAdminCredentials] = useState({
+    username: "",
+    secretKey: "",
+  });
+
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+
+  const handleCredentialChange = (key: string, value: string) => {
+    setCredentials((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAdminCredentialChange = (
+    key: string,
+    value: string
+  ) => {
+    setAdminCredentials((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleLogin = () => {
+    console.log("User Login:", credentials);
+    setIsLoginOpen(false);
+  };
+
+  const handleAdminLogin = () => {
+    console.log("Admin Login:", adminCredentials);
+    setIsSecondLoginOpen(false);
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header with hamburger */}
       <Header toggleSidebar={toggleSidebar} />
 
       <div className="flex flex-grow">
-        {/* Sidebar controlled by state */}
         <Sidebar isOpen={isSidebarOpen} />
 
-        {/* Main content */}
         <main className="flex-grow p-4">
-          {/* Bargraph at the top */}
           <Bargraph />
 
-          {/* MultilevelDropdown below Bargraph */}
+          {/* DROPDOWN  */}
           <div className="mt-6 gap-6 flex justify-center">
             <MultilevelDropdown />
-            <Searchbar 
-            placeholder="Search anything..." 
-            value={searchValue}
-            onChange={setSearchValue}
+            <Searchbar
+              placeholder="Search anything..."
+              value={searchValue}
+              onChange={setSearchValue}
+            />
+
+            
+            <Login
+              credentials={credentials}
+              setCredentials={handleCredentialChange}
+              isOpen={isLoginOpen}
+              setIsOpen={setIsLoginOpen}
+              onLogin={handleLogin}
+              type="user"
+            />
+
+            
+            <Login
+              credentials={adminCredentials}
+              setCredentials={handleAdminCredentialChange}
+              isOpen={isSecondLoginOpen}
+              setIsOpen={setIsSecondLoginOpen}
+              onLogin={handleAdminLogin}
+              type="admin"
             />
           </div>
         </main>
       </div>
 
-      {/* Footer at bottom */}
       <Footer />
     </div>
   );
