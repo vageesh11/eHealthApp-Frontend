@@ -6,6 +6,8 @@ import Sidebar from "./components/Sidebar";
 import MultilevelDropdown from "./components/MultilevelDropdown";
 import Searchbar from "./components/Searchbar";
 import Login from "./components/Login";
+import Cards from "./components/cards";
+import Table from "./components/Table";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,6 +85,12 @@ function App() {
               onLogin={handleAdminLogin}
               type="admin"
             />
+          </div>
+           <div className="mt-8">
+            <Cards />
+          </div>
+          <div className="mt-8">
+          <Table />
           </div>
         </main>
       </div>
