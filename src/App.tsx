@@ -8,16 +8,26 @@ import Searchbar from "./components/Searchbar";
 import Login from "./components/Login";
 import Cards from "./components/cards";
 import Table from "./components/Table";
+import Piegraph from "./components/Piegraph";
+import Linegraph from "./components/Linegraph";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  //Login
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  
+  const columns = ["Customer ID", "Name", "Effective Date", "Renewal Date", "Payment Status"];
+  const data = [
+    { "Customer ID": "CUST001", Name: "John Doe", "Effective Date": "2025-01-01", "Renewal Date": "2026-01-01", "Payment Status": "Paid" },
+    { "Customer ID": "CUST002", Name: "Jane Smith", "Effective Date": "2025-02-01", "Renewal Date": "2026-02-01", "Payment Status": "Pending" },
+    { "Customer ID": "CUST003", Name: "Alice Johnson", "Effective Date": "2025-03-01", "Renewal Date": "2026-03-01", "Payment Status": "Paid" },
+    { "Customer ID": "CUST004", Name: "Mark Lee", "Effective Date": "2025-04-01", "Renewal Date": "2026-04-01", "Payment Status": "Paid" },
+    { "Customer ID": "CUST005", Name: "Sophia Brown", "Effective Date": "2025-05-01", "Renewal Date": "2026-05-01", "Payment Status": "Paid" },
+  ];
 
   
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [isSecondLoginOpen, setIsSecondLoginOpen] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState({
     username: "",
@@ -30,10 +40,7 @@ function App() {
     setCredentials((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleAdminCredentialChange = (
-    key: string,
-    value: string
-  ) => {
+  const handleAdminCredentialChange = (key: string, value: string) => {
     setAdminCredentials((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -57,7 +64,7 @@ function App() {
         <main className="flex-grow p-4">
           <Bargraph />
 
-          {/* DROPDOWN  */}
+          {/* DROPDOWN + SEARCH */}
           <div className="mt-6 gap-6 flex justify-center">
             <MultilevelDropdown />
             <Searchbar
@@ -66,7 +73,7 @@ function App() {
               onChange={setSearchValue}
             />
 
-            
+            {/* Login Modals */}
             <Login
               credentials={credentials}
               setCredentials={handleCredentialChange}
@@ -76,7 +83,6 @@ function App() {
               type="user"
             />
 
-            
             <Login
               credentials={adminCredentials}
               setCredentials={handleAdminCredentialChange}
@@ -86,12 +92,25 @@ function App() {
               type="admin"
             />
           </div>
-           <div className="mt-8">
+
+          {/* CARDS SECTION */}
+          <div className="mt-8">
             <Cards />
           </div>
+
+          {/* TABLE */}
           <div className="mt-8">
-          <Table />
+            <Table columns={columns} data={data} />
           </div>
+
+          <div className="mt-8">
+            <Piegraph />
+          </div>
+
+          <div className="mt-8">
+            <Linegraph />
+          </div>
+
         </main>
       </div>
 
