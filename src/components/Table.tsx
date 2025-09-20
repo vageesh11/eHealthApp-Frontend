@@ -1,42 +1,50 @@
 import React from "react";
 
-const Table: React.FC = () => {
-  const data = [
-    { id: "CUST001", name: "John Doe", effective: "2025-01-01", renewal: "2026-01-01", status: "Paid" },
-    { id: "CUST002", name: "Jane Smith", effective: "2025-02-01", renewal: "2026-02-01", status: "Pending" },
-    { id: "CUST003", name: "Alice Johnson", effective: "2025-03-01", renewal: "2026-03-01", status: "Paid" },
-    { id: "CUST004", name: "Mark Lee", effective: "2025-04-01", renewal: "2026-04-01", status: "Paid" },
-    { id: "CUST005", name: "Sophia Brown", effective: "2025-05-01", renewal: "2026-05-01", status: "Paid" },
-  ];
+interface TableProps {
+  columns: string[];
+  data: { [key: string]: string }[];
+}
 
+const Table: React.FC<TableProps> = ({ columns, data }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md p-4">
+    <div className="bg-white rounded-xl shadow-md p-4 overflow-x-auto">
       <table className="table-auto w-full text-left border-collapse">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-3 border-b">Customer ID</th>
-            <th className="p-3 border-b">Name</th>
-            <th className="p-3 border-b">Effective Date</th>
-            <th className="p-3 border-b">Renewal Date</th>
-            <th className="p-3 border-b">Payment Status</th>
+            {columns.map((col, index) => (
+              <th key={index} className="p-3 border-b">
+                {col}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {data.slice(0, 5).map((row, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="p-3 border-b">{row.id}</td>
-              <td className="p-3 border-b">{row.name}</td>
-              <td className="p-3 border-b">{row.effective}</td>
-              <td className="p-3 border-b">{row.renewal}</td>
-              <td
-                className={`p-3 border-b font-semibold ${
-                  row.status === "Paid" ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {row.status}
+          {data.length > 0 ? (
+            data.slice(0, 5).map((row, rowIndex) => (
+              <tr key={rowIndex} className="hover:bg-gray-50">
+                {columns.map((col, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={`p-3 border-b ${
+                      col === "Payment Status"
+                        ? row[col] === "Paid"
+                          ? "text-green-600 font-semibold"
+                          : "text-red-600 font-semibold"
+                        : ""
+                    }`}
+                  >
+                    {row[col]}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} className="text-center p-4 text-gray-500">
+                No data available
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
