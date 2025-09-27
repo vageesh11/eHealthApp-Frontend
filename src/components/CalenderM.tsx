@@ -10,12 +10,14 @@ import {
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Popup from "./Popup";
 
 const CalenderM: React.FC = () => {
- 
   const [view, setView] = useState<"Day" | "Work Week" | "Month">("Day");
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [openRightDropdown, setOpenRightDropdown] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
   const handleViewChange = (newView: "Day" | "Work Week" | "Month") => {
     setView(newView);
@@ -44,17 +46,15 @@ const CalenderM: React.FC = () => {
   const handleTimeClick = (hour: number, day?: Date) => {
     const selected = new Date(day || startDate || new Date());
     selected.setHours(hour, 0, 0, 0);
-    alert(
-      `You clicked ${selected.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      })} at ${selected.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}`
-    );
+
+    const formattedTime = selected.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    setSelectedTime(formattedTime);
+    setIsPopupOpen(true);
   };
 
   /** Day View */
@@ -127,6 +127,7 @@ const CalenderM: React.FC = () => {
               <div className="flex justify-center text-sm text-gray-600 border-r border-gray-300">
                 {formatHour(hour)}
               </div>
+
               {days.map((day) => (
                 <button
                   key={day.toDateString() + hour}
@@ -176,16 +177,6 @@ const CalenderM: React.FC = () => {
           {days.map((day, idx) => (
             <button
               key={idx}
-              onClick={() =>
-                alert(
-                  `You clicked ${day.toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}`
-                )
-              }
               className={`p-4 h-20 border border-gray-300 hover:bg-blue-100 transition ${
                 day.getMonth() !== month ? "bg-gray-100 text-gray-400" : ""
               }`}
@@ -262,6 +253,7 @@ const CalenderM: React.FC = () => {
           />
         </div>
 
+        {/* Right Side Dropdown */}
         <div className="relative">
           <button
             className="flex items-center gap-2 px-3 py-1 rounded-xl bg-gray-500 hover:bg-gray-700"
@@ -296,6 +288,13 @@ const CalenderM: React.FC = () => {
       {view === "Day" && renderDayView()}
       {view === "Work Week" && renderWorkWeekView()}
       {view === "Month" && renderMonthView()}
+
+      <Popup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        onSave={(data) => console.log("Saved event:", data)}
+        selectedTime={selectedTime}
+      />
     </div>
   );
 };
