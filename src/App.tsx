@@ -68,10 +68,17 @@ const App: React.FC = () => {
                   <>
                     <Bargraph />
 
-                    <div className="mt-6 gap-6 flex justify-center">
-                      <MultilevelDropdown />
-                      <Searchbar placeholder="Search anything..." value={searchValue} onChange={setSearchValue} />
+                    {/* <div className="mt-6 gap-6 flex justify-center"> */}
 
+                      <div className="mt-8 justify-center">
+                      <MultilevelDropdown />
+                      </div>
+
+                       <div className="mt-8 w-1/5 max-w-xs">
+                      <Searchbar placeholder="Search anything..." value={searchValue} onChange={setSearchValue} />
+                      </div>
+
+                      <div className="mt-8">
                       <Login
                         credentials={credentials}
                         setCredentials={handleCredentialChange}
@@ -80,7 +87,9 @@ const App: React.FC = () => {
                         onLogin={handleLogin}
                         type="user"
                       />
+                      </div>
 
+                       <div className="mt-8">
                       <Login
                         credentials={adminCredentials}
                         setCredentials={handleAdminCredentialChange}
@@ -89,7 +98,9 @@ const App: React.FC = () => {
                         onLogin={handleAdminLogin}
                         type="admin"
                       />
-                    </div>
+                      </div>
+
+                    {/* </div> */}
 
                     <div className="mt-8">
                       <Cards />

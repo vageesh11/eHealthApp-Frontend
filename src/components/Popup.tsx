@@ -1,121 +1,193 @@
-import React, { useEffect, useRef } from "react";
+
+// import React, { useState, useEffect } from "react";
+
+// interface PopupProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   onSave: (data: { title: string; location?: string; time: string }) => void;
+//   selectedTime: string;
+//   selectedDate: Date | null;
+// }
+
+// const Popup: React.FC<PopupProps> = ({ isOpen, onClose, onSave, selectedTime, selectedDate }) => {
+//   const [title, setTitle] = useState("");
+//   const [location, setLocation] = useState("");
+//   const [time, setTime] = useState(selectedTime || "");
+
+//   useEffect(() => {
+//     setTime(selectedTime || "");
+//   }, [selectedTime]);
+
+//   if (!isOpen) return null;
+
+//   const handleSave = () => {
+//     if (!title.trim()) {
+//       alert("Please enter a title");
+//       return;
+//     }
+
+//     onSave({ title, location, time });
+//     setTitle("");
+//     setLocation("");
+//     setTime("");
+//   };
+
+//   return (
+//     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+//       <div className="bg-white rounded-xl shadow-lg p-6 w-80">
+//         <h2 className="text-lg font-semibold mb-4 text-gray-800">Add Event</h2>
+
+//         {selectedDate && (
+//           <p className="text-sm text-gray-600 mb-2">
+//             {selectedDate.toLocaleDateString("en-US", {
+//               weekday: "long",
+//               year: "numeric",
+//               month: "long",
+//               day: "numeric",
+//             })}
+//           </p>
+//         )}
+
+//         <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+//         <input
+//           type="text"
+//           value={title}
+//           onChange={(e) => setTitle(e.target.value)}
+//           placeholder="Event title"
+//           className="w-full border border-gray-300 rounded-md p-2 mb-3 focus:ring-2 focus:ring-blue-400 outline-none"
+//         />
+
+//         <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+//         <input
+//           type="text"
+//           value={location}
+//           onChange={(e) => setLocation(e.target.value)}
+//           placeholder="Location (optional)"
+//           className="w-full border border-gray-300 rounded-md p-2 mb-3 focus:ring-2 focus:ring-blue-400 outline-none"
+//         />
+
+//         <label className="block text-sm font-medium text-gray-700 mb-1">Time (24-hour)</label>
+//         <input
+//           type="time"
+//           value={time}
+//           onChange={(e) => setTime(e.target.value)}
+//           className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:ring-2 focus:ring-blue-400 outline-none"
+//         />
+
+//         <div className="flex justify-end gap-3">
+//           <button
+//             onClick={onClose}
+//             className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={handleSave}
+//             className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition"
+//           >
+//             Save
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Popup;
+
+
+import React, { useState, useEffect } from "react";
 
 interface PopupProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (data: { title: string; time: string; location: string }) => void;
-    selectedTime: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: { title: string; location?: string; time: string }) => void;
+  selectedTime: string;
+  selectedDate: Date | null;
 }
 
-const Popup: React.FC<PopupProps> = ({ isOpen, onClose, onSave }) => {
-    const [title, setTitle] = React.useState("");
-    const [time, setTime] = React.useState("");
-    const [location, setLocation] = React.useState("");
+const Popup: React.FC<PopupProps> = ({ isOpen, onClose, onSave, selectedTime, selectedDate }) => {
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [time, setTime] = useState(selectedTime || "");
 
-    const popupRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    setTime(selectedTime || "");
+  }, [selectedTime]);
 
-    useEffect(() => {
-        if (!isOpen) return;
+  if (!isOpen) return null;
 
-        const handleClickOutside = (e: MouseEvent) => {
-            if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-                onClose();
-            }
-        };
+  const handleSave = () => {
+    if (!title.trim()) {
+      alert("Please enter a title");
+      return;
+    }
 
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
+    onSave({ title, location, time });
+    setTitle("");
+    setLocation("");
+    setTime("");
+  };
 
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleKeyDown);
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-0 z-50">
+      <div className="bg-white rounded-xl shadow-lg p-6 w-80">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Add Event</h2>
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [isOpen, onClose]);
+        {selectedDate && (
+          <p className="text-sm text-gray-600 mb-2">
+            {selectedDate.toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+        )}
 
-    if (!isOpen) return null;
+        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Event title"
+          className="w-full border border-gray-300 rounded-md p-2 mb-3 focus:ring-2 focus:ring-blue-400 outline-none"
+        />
 
-    const handleSave = () => {
-        onSave({ title, time, location });
-        setTitle("");
-        setTime("");
-        setLocation("");
-        onClose();
-    };
+        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Location (optional)"
+          className="w-full border border-gray-300 rounded-md p-2 mb-3 focus:ring-2 focus:ring-blue-400 outline-none"
+        />
 
-    const handleDiscard = () => {
-        setTitle("");
-        setTime("");
-        setLocation("");
-        onClose();
-    };
+        <label className="block text-sm font-medium text-gray-700 mb-1">Time (24-hour)</label>
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:ring-2 focus:ring-blue-400 outline-none"
+        />
 
-    return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div
-                ref={popupRef}
-                className="bg-white rounded-xl shadow-lg w-11/12 max-w-xs p-4"
-            >
-                <h2 className="text-lg font-bold mb-3 text-gray-800">Add Event</h2>
-
-                <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Title
-                    </label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-1.5 text-sm focus:ring-1 focus:ring-blue-400 focus:outline-none"
-                        placeholder="Enter title"
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Timings
-                    </label>
-                    <input
-                        type="time"
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-1.5 text-sm"
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Location
-                    </label>
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-1.5 text-sm focus:ring-1 focus:ring-blue-400 focus:outline-none"
-                        placeholder="Enter location"
-                    />
-                </div>
-
-                <div className="flex justify-end gap-2 mt-4">
-                    <button
-                        onClick={handleDiscard}
-                        className="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm"
-                    >
-                        Discard
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        className="px-3 py-1.5 rounded-lg bg-[rgb(0,109,111)] hover:bg-[rgb(89,214,216)] text-white text-sm"
-                    >
-                        Save
-                    </button>
-                </div>
-            </div>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition"
+          >
+            Save
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Popup;

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaHome, FaUserAlt, FaCog, FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { RootState } from "../store/store";
+import { useSelector } from "react-redux";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,6 +11,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const [isHovered, setIsHovered] = useState(false);
   const expanded = isOpen || isHovered;
+  const count = useSelector((state:RootState)=>state.counter.value);
 
   return (
     <div
@@ -18,6 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <div>count:{count}</div>
       <nav className="mt-6">
         <ul>
           {/* Home */}

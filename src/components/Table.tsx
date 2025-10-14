@@ -1,54 +1,66 @@
 import React from "react";
+import {
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 
 interface TableProps {
   columns: string[];
   data: { [key: string]: string }[];
 }
 
-const Table: React.FC<TableProps> = ({ columns, data }) => {
+const CustomTable: React.FC<TableProps> = ({ columns, data }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 overflow-x-auto">
-      <table className="table-auto w-full text-left border-collapse">
-        <thead className="bg-gray-100">
-          <tr>
+    <TableContainer component={Paper} elevation={3}>
+      <MuiTable>
+        {/* HEADER */}
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "#e5e7eb" }}> 
             {columns.map((col, index) => (
-              <th key={index} className="p-3 border-b">
-                {col}
-              </th>
+              <TableCell key={index}>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {col}
+                </Typography>
+              </TableCell>
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.length > 0 ? (
-            data.slice(0, 5).map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-50">
-                {columns.map((col, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className={`p-3 border-b ${
-                      col === "Payment Status"
-                        ? row[col] === "Paid"
-                          ? "text-green-600 font-semibold"
-                          : "text-red-600 font-semibold"
-                        : ""
-                    }`}
-                  >
-                    {row[col]}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={columns.length} className="text-center p-4 text-gray-500">
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          </TableRow>
+        </TableHead>
+
+        {/* ROWS */}
+        <TableBody>
+          {data.map((row, rowIndex) => (
+            <TableRow key={rowIndex} hover>
+              {columns.map((col, colIndex) => (
+                <TableCell key={colIndex}>
+                  {col === "Payment Status" ? (
+                    row[col] === "Paid" ? (
+                      <span style={{ color: "green", fontWeight: "bold" }}>
+                        <CheckCircleIcon fontSize="small" /> Paid
+                      </span>
+                    ) : (
+                      <span style={{ color: "red", fontWeight: "bold" }}>
+                        <ErrorIcon fontSize="small" /> Unpaid
+                      </span>
+                    )
+                  ) : (
+                    row[col]
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </MuiTable>
+    </TableContainer>
   );
 };
 
-export default Table;
+export default CustomTable;

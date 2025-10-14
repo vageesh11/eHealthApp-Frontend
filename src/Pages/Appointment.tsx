@@ -1,10 +1,10 @@
 import React from "react";
-import CalenderM from "../components/CalenderM";
+import CalendarM from "../components/CalendarM";
 
 const Appointment: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <CalenderM />
+      <CalendarM />
       <div className="mt-4">
         <h1 className="text-xl font-bold">Appointments</h1>
       </div>

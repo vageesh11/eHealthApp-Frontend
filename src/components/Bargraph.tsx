@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import Title from "./Title"; 
 import Dropdown from  "./Dropdown";
-import Calender from "./Calender";
+import Calendar from "./Calendar";
 
 const data = [
   { name: "Jan", revenue: 500, expenses: 350, profits: 50 },
@@ -29,7 +29,7 @@ const Bargraph = () => {
       <Title text="Financial Overview" />
       <div className='flex items-center gap-4'>
         <Dropdown />
-       <Calender />
+       <Calendar />
       </div>
       </div>
       {/* Subtitle */}
