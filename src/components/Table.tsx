@@ -11,20 +11,24 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+import { tableColumns, tableData } from "../utils/TablesConstants";
 
-interface TableProps {
-  columns: string[];
-  data: { [key: string]: string }[];
+interface TableRowData {
+  "Customer ID": string;
+  Name: string;
+  "Effective Date": string;
+  "Renewal Date": string;
+  "Payment Status": string;
 }
 
-const CustomTable: React.FC<TableProps> = ({ columns, data }) => {
+const CustomTable: React.FC = () => {
   return (
     <TableContainer component={Paper} elevation={3}>
       <MuiTable>
         {/* HEADER */}
         <TableHead>
-          <TableRow sx={{ backgroundColor: "#e5e7eb" }}> 
-            {columns.map((col, index) => (
+          <TableRow sx={{ backgroundColor: "#e5e7eb" }}>
+            {tableColumns.map((col, index) => (
               <TableCell key={index}>
                 <Typography variant="subtitle2" fontWeight="bold">
                   {col}
@@ -36,25 +40,30 @@ const CustomTable: React.FC<TableProps> = ({ columns, data }) => {
 
         {/* ROWS */}
         <TableBody>
-          {data.map((row, rowIndex) => (
+          {tableData.map((row: TableRowData, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              {columns.map((col, colIndex) => (
-                <TableCell key={colIndex}>
-                  {col === "Payment Status" ? (
-                    row[col] === "Paid" ? (
-                      <span style={{ color: "green", fontWeight: "bold" }}>
-                        <CheckCircleIcon fontSize="small" /> Paid
-                      </span>
+              {tableColumns.map((col) => {
+                // ✅ Tell TypeScript col is keyof TableRowData
+                const key = col as keyof TableRowData;
+
+                return (
+                  <TableCell key={col}>
+                    {key === "Payment Status" ? (
+                      row[key] === "Paid" ? (
+                        <span style={{ color: "green", fontWeight: "bold" }}>
+                          <CheckCircleIcon fontSize="small" /> Paid
+                        </span>
+                      ) : (
+                        <span style={{ color: "red", fontWeight: "bold" }}>
+                          <ErrorIcon fontSize="small" /> Unpaid
+                        </span>
+                      )
                     ) : (
-                      <span style={{ color: "red", fontWeight: "bold" }}>
-                        <ErrorIcon fontSize="small" /> Unpaid
-                      </span>
-                    )
-                  ) : (
-                    row[col]
-                  )}
-                </TableCell>
-              ))}
+                      row[key]
+                    )}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))}
         </TableBody>

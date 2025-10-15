@@ -1,4 +1,5 @@
 import React from "react";
+import { CARDS_DATA } from "../utils/CardsConstants";
 
 interface CardProps {
   title: string;
@@ -21,7 +22,6 @@ const Card: React.FC<CardProps> = ({
     <div
       className={`flex flex-col justify-between rounded-2xl shadow-md p-4 w-full min-w-[250px] min-h-[140px] text-white ${bgColor} snap-start`}
     >
-     
       <img src={icon} alt={title} className="w-10 h-10 object-contain mb-2" />
 
       <p className="text-lg font-medium mt-10">{title}</p>
@@ -43,38 +43,17 @@ const Card: React.FC<CardProps> = ({
 const Cards: React.FC = () => {
   return (
     <div className="flex gap-4">
-      <Card
-        title="Enrolled Members"
-        value={1500}
-        percentage="+0.54%"
-        isPositive
-        icon="/images/enrolled.png"
-        bgColor="bg-purple-400"
-      />
-      <Card
-        title="Customers"
-        value={32300}
-        percentage="-13.66%"
-        isPositive={false}
-        icon="/images/customers.png"
-        bgColor="bg-blue-400"
-      />
-      <Card
-        title="Consumers"
-        value={15000}
-        percentage="+18.67%"
-        isPositive
-        icon="/images/consumers.png"
-        bgColor="bg-teal-400"
-      />
-      <Card
-        title="Total Claim Submissions"
-        value={234987}
-        percentage="+0.37%"
-        isPositive
-        icon="/images/claims.png"
-        bgColor="bg-pink-400"
-      />
+      {CARDS_DATA.map((card) => (
+        <Card
+          key={card.title}
+          title={card.title}
+          value={card.value}
+          percentage={card.percentage}
+          isPositive={card.isPositive}
+          bgColor={card.bgColor}
+          icon={card.icon}
+        />
+      ))}
     </div>
   );
 };

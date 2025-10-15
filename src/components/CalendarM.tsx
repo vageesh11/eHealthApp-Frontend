@@ -39,11 +39,10 @@ const CalendarM: React.FC = () => {
     }
   };
 
-  const formatHour = (hour: number) => hour.toString(); // 0–23
+  const formatHour = (hour: number) => hour.toString();
 
-  const isoDateKey = (d: Date) => d.toISOString().split("T")[0];
+  const isoDateKey = (d: Date) => d.toLocaleDateString("en-CA");
 
-  // --- Handle time click for popup floating near cell ---
   const handleTimeClick = (hour: number, e: React.MouseEvent<HTMLButtonElement>, day?: Date) => {
     if (view === "Month") return;
     const selected = new Date(day || startDate);
@@ -61,13 +60,14 @@ const CalendarM: React.FC = () => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const dayKey = isoDateKey(startDate);
 
+  
   const dayEventsMap = useMemo(() => {
-    const map: { [key: number]: Event[] } = {};
-    hours.forEach(h => map[h] = []);
+    const map: { [key: string]: Event[] } = {};
     events.forEach(e => {
       if (e.date === dayKey) {
-        const hour = parseInt(e.time.split(":")[0]);
-        map[hour]?.push(e);
+        const hourKey = e.time; 
+        map[hourKey] = map[hourKey] || [];
+        map[hourKey].push(e);
       }
     });
     return map;
@@ -102,11 +102,15 @@ const CalendarM: React.FC = () => {
       </div>
       <div className="divide-y divide-gray-300">
         {hours.map(hour => {
-          const hourEvents = dayEventsMap[hour] || [];
           const isToday =
             startDate.getFullYear() === today.getFullYear() &&
             startDate.getMonth() === today.getMonth() &&
             startDate.getDate() === today.getDate();
+
+          // Get all events for this hour (full HH:mm match)
+          const hourEvents = Object.keys(dayEventsMap)
+            .filter(k => k.startsWith(hour.toString().padStart(2, "0")))
+            .flatMap(k => dayEventsMap[k] || []);
 
           return (
             <button
@@ -117,7 +121,7 @@ const CalendarM: React.FC = () => {
               <div className="w-16 text-right pr-3 text-gray-600 text-sm">{formatHour(hour)}</div>
               <div className="flex-1 border-l border-gray-300 h-full relative bg-white">
                 {hourEvents.map(ev => (
-                  <div key={ev.id} className="absolute left-2 top-1 bg-pink-200 text-xs p-1 rounded">
+                  <div key={ev.id} className="absolute inset-0 bg-pink-200 text-xs p-1 rounded flex items-center justify-start">
                     {ev.title} {ev.location && `@ ${ev.location}`}
                   </div>
                 ))}
@@ -151,10 +155,15 @@ const CalendarM: React.FC = () => {
             <div className="flex justify-center text-sm text-gray-600 border-r border-gray-300">{formatHour(hour)}</div>
             {workWeekDays.map(day => {
               const dateKey = isoDateKey(day);
-              const hourEvents = (workWeekEventsMap[dateKey] || []).filter(e => parseInt(e.time.split(":")[0]) === hour);
+              const hourEvents = (workWeekEventsMap[dateKey] || []).filter(e => {
+                const [h, m] = e.time.split(":").map(Number);
+                return h === hour;
+              });
+
               const isToday = day.getFullYear() === today.getFullYear() &&
                 day.getMonth() === today.getMonth() &&
                 day.getDate() === today.getDate();
+
               return (
                 <button
                   key={day.toDateString() + hour}
@@ -162,7 +171,7 @@ const CalendarM: React.FC = () => {
                   className={`border-r border-gray-300 relative transition ${isToday ? "bg-pink-50 hover:bg-pink-100" : "hover:bg-blue-100"}`}
                 >
                   {hourEvents.map(ev => (
-                    <div key={ev.id} className="absolute left-1 top-1 bg-pink-200 text-xs p-1 rounded">
+                    <div key={ev.id} className="absolute inset-0 bg-pink-200 text-xs p-1 rounded flex items-center justify-start">
                       {ev.title} {ev.location && `@ ${ev.location}`}
                     </div>
                   ))}
@@ -208,7 +217,7 @@ const CalendarM: React.FC = () => {
     return (
       <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
         <div className="grid grid-cols-7 bg-gray-200 text-center font-bold">
-          {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(day => <div key={day} className="p-2">{day}</div>)}
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => <div key={day} className="p-2">{day}</div>)}
         </div>
         <div className="grid grid-cols-7">
           {days.map((day, idx) => {
@@ -251,19 +260,19 @@ const CalendarM: React.FC = () => {
             selected={startDate}
             onChange={date => setStartDate(date || new Date())}
             dateFormat="MMMM d, yyyy"
-            customInput={<button className="flex items-center gap-1 font-medium">{startDate.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}<FaChevronDown className="w-3 h-3"/></button>}
+            customInput={<button className="flex items-center gap-1 font-medium">{startDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}<FaChevronDown className="w-3 h-3" /></button>}
             popperClassName="z-50"
           />
         </div>
 
-        {/* Right dropdown */}
+       
         <div className="relative">
           <button className="flex items-center gap-2 px-3 py-1 rounded-xl bg-gray-500 hover:bg-gray-700" onClick={() => setOpenRightDropdown(prev => !prev)}>
             {getIcon(view)}{view}<FaChevronDown className={`w-3 h-3 transition-transform ${openRightDropdown ? "rotate-180" : ""}`} />
           </button>
           {openRightDropdown && (
             <div className="absolute right-0 mt-2 bg-gray-500 rounded-xl shadow-lg z-50 min-w-[160px]">
-              {(["Day","Work Week","Month"] as const).map(option => (
+              {(["Day", "Work Week", "Month"] as const).map(option => (
                 <button key={option} className="flex items-center w-full px-4 py-2 hover:bg-gray-700" onClick={() => { setView(option); setOpenRightDropdown(false); }}>
                   {getIcon(option)}{option}
                 </button>
@@ -278,36 +287,37 @@ const CalendarM: React.FC = () => {
       {view === "Work Week" && renderWorkWeekView()}
       {view === "Month" && renderMonthView()}
 
-      {/* Popup near clicked cell */}
       {isPopupOpen && selectedDate && (
-        <div
-          style={{
-            position: "absolute",
-            top: popupPosition.top,
-            left: popupPosition.left,
-            zIndex: 9999,
-          }}
-        >
-          <Popup
-            isOpen={isPopupOpen}
-            selectedTime={selectedTime}
-            selectedDate={selectedDate}
-            onClose={() => { setIsPopupOpen(false); setSelectedTime(""); setSelectedDate(null); }}
-            onSave={data => {
-              const usedDate = selectedDate || startDate;
-              dispatch(addEvent({
-                id: Date.now(),
-                title: data.title,
-                date: isoDateKey(usedDate),
-                time: data.time || selectedTime,
-                location: data.location,
-                view: view === "Day" ? "day" : "workweek",
-              } as Event));
-              setIsPopupOpen(false); setSelectedTime(""); setSelectedDate(null);
-            }}
-          />
-        </div>
-      )}
+  <Popup
+    isOpen={isPopupOpen}
+    selectedTime={selectedTime}
+    selectedDate={selectedDate}
+    position={popupPosition}
+    viewportWidth={window.innerWidth} 
+    onClose={() => {
+      setIsPopupOpen(false);
+      setSelectedTime("");
+      setSelectedDate(null);
+    }}
+    onSave={(data) => {
+      const usedDate = selectedDate || startDate;
+      dispatch(
+        addEvent({
+          id: Date.now(),
+          title: data.title,
+          date: isoDateKey(usedDate),
+          time: data.time,
+          location: data.location,
+          view: view === "Day" ? "day" : "workweek",
+        } as Event)
+      );
+      setIsPopupOpen(false);
+      setSelectedTime("");
+      setSelectedDate(null);
+    }}
+  />
+)}
+
     </div>
   );
 };

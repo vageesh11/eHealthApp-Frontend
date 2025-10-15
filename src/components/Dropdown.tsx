@@ -1,29 +1,12 @@
 import React, { useState } from "react";
-import { FaChevronDown} from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 import Searchbar from "./Searchbar";
+import { hospitals, doctors, nurses } from "../utils/DropdownConstants";
 
 const Dropdown: React.FC = () => {
   const [selectedHospital, setSelectedHospital] = useState<string>("");
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
   const [selectedNurse, setSelectedNurse] = useState<string>("");
-
-  const hospitals = ["Hospital 1", "Hospital 2", "Hospital 3", "Hospital 4", "Hospital 5"];
-
-  const doctors: Record<string, string[]> = {
-    "Hospital 1": ["Doctor 1"],
-    "Hospital 2": ["Doctor 1", "Doctor 2", "Doctor 3"],
-    "Hospital 3": ["Doctor 1", "Doctor 2", "Doctor 3", "Doctor 4", "Doctor 5"],
-    "Hospital 4": ["Doctor 1"],
-    "Hospital 5": ["Doctor 1"],
-  };
-
-  const nurses: Record<string, string[]> = {
-    "Doctor 1": ["Nurse 1", "Nurse 2", "Nurse 3"],
-    "Doctor 2": ["Nurse 1"],
-    "Doctor 3": ["Nurse 1"],
-    "Doctor 4": ["Nurse 1", "Nurse 2", "Nurse 3"],
-    "Doctor 5": ["Nurse 1"],
-  };
 
   const [openHospital, setOpenHospital] = useState(false);
   const [openDoctor, setOpenDoctor] = useState(false);
@@ -34,7 +17,7 @@ const Dropdown: React.FC = () => {
   const [doctorSearch, setDoctorSearch] = useState("");
   const [nurseSearch, setNurseSearch] = useState("");
 
-  // Filtered Lists
+  // Filtered lists
   const filteredHospitals = hospitals.filter((h) =>
     h.toLowerCase().includes(hospitalSearch.toLowerCase())
   );
@@ -104,10 +87,8 @@ const Dropdown: React.FC = () => {
         </button>
 
         {openHospital && (
-          <div className="absolute mt-1 w-50 text-sm bg-white border rounded-lg  z-10">
-            {/* Searchbar with icon */}
+          <div className="absolute mt-1 w-50 text-sm bg-white border rounded-lg z-10">
             <div className="flex items-center px-2 py-1">
-              {/* <FaSearch className="text-gray-400 mr-2" size={12} /> */}
               <Searchbar
                 placeholder="Search Hospital..."
                 value={hospitalSearch}
@@ -151,9 +132,7 @@ const Dropdown: React.FC = () => {
 
             {openDoctor && (
               <div className="absolute mt-1 w-50 text-sm bg-white border rounded-lg shadow-lg z-10">
-                {/*Searchbar  */}
                 <div className="flex items-center px-2 py-1">
-                  {/* <FaSearch className="text-gray-400 mr-2" size={12} /> */}
                   <Searchbar
                     placeholder="Search Doctor..."
                     value={doctorSearch}
@@ -200,9 +179,7 @@ const Dropdown: React.FC = () => {
 
           {openNurse && (
             <div className="absolute mt-1 w-50 text-sm bg-white border rounded-lg shadow-lg z-10">
-              {/* Searchbar with icon */}
               <div className="flex items-center">
-                {/* <FaSearch className="text-gray-400 mr-2" size={12} /> */}
                 <Searchbar
                   placeholder="Search Nurse..."
                   value={nurseSearch}
