@@ -77,7 +77,7 @@ const Dropdown: React.FC = () => {
             setOpenDoctor(false);
             setOpenNurse(false);
           }}
-          className="border rounded-lg w-39 py-0.3 px-1 flex text-sm justify-between items-center focus:ring-2 focus:ring-[rgb(0,109,111)]"
+          className="border rounded-lg w-40 py-0.3 px-1 flex text-sm justify-between items-center focus:ring-2 focus:ring-[rgb(0,109,111)]"
         >
           <span>{selectedHospital || "Select Hospital"}</span>
           <FaChevronDown
@@ -121,7 +121,7 @@ const Dropdown: React.FC = () => {
                 setOpenDoctor(!openDoctor);
                 setOpenNurse(false);
               }}
-              className="border rounded-lg w-39 py-0.3 px-1 text-sm flex justify-between items-center text-left focus:ring-2 focus:ring-[rgb(0,109,111)]"
+              className="border rounded-lg w-40 py-0.3 px-1 text-sm flex justify-between items-center text-left focus:ring-2 focus:ring-[rgb(0,109,111)]"
             >
               <span>{selectedDoctor || "Select Doctor"}</span>
               <FaChevronDown
@@ -131,7 +131,7 @@ const Dropdown: React.FC = () => {
             </button>
 
             {openDoctor && (
-              <div className="absolute mt-1 w-50 text-sm bg-white border rounded-lg shadow-lg z-10">
+              <div className="absolute mt-1 w-55 text-sm bg-white border rounded-lg shadow-lg z-10">
                 <div className="flex items-center px-2 py-1">
                   <Searchbar
                     placeholder="Search Doctor..."
@@ -168,7 +168,7 @@ const Dropdown: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setOpenNurse(!openNurse)}
-            className="border rounded-lg w-50 py-0.3 px-1 text-sm flex justify-between items-center text-left focus:ring-2 focus:ring-[rgb(0,109,111)]"
+            className="border rounded-lg w-40 py-0.3 px-1 text-sm flex justify-between items-center text-left focus:ring-2 focus:ring-[rgb(0,109,111)]"
           >
             <span>{selectedNurse || "Select Nurse"}</span>
             <FaChevronDown

@@ -1,61 +1,37 @@
 import React from "react";
-import { CARDS_DATA } from "../utils/CardsConstants";
+import { Card } from "react-bootstrap";
+import { cardStats } from "../utils/CardsConstants";
 
-interface CardProps {
-  title: string;
-  value: string | number;
-  percentage: string;
-  isPositive?: boolean;
-  bgColor: string;
-  icon: string;
-}
-
-const Card: React.FC<CardProps> = ({
-  title,
-  value,
-  percentage,
-  isPositive = true,
-  bgColor,
-  icon,
-}) => {
+const DashboardCards = () => {
   return (
-    <div
-      className={`flex flex-col justify-between rounded-2xl shadow-md p-4 w-full min-w-[250px] min-h-[140px] text-white ${bgColor} snap-start`}
-    >
-      <img src={icon} alt={title} className="w-10 h-10 object-contain mb-2" />
-
-      <p className="text-lg font-medium mt-10">{title}</p>
-
-      <div className="flex justify-between items-end mt-auto">
-        <p className="text-xl font-bold">{value}</p>
-        <p
-          className={`text-sm font-semibold ${
-            isPositive ? "text-green-100" : "text-red-200"
-          }`}
-        >
-          {percentage}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Cards: React.FC = () => {
-  return (
-    <div className="flex gap-4">
-      {CARDS_DATA.map((card) => (
+    <div className="flex flex-wrap gap-4 p-4">
+      {cardStats.map((stat, index) => (
         <Card
-          key={card.title}
-          title={card.title}
-          value={card.value}
-          percentage={card.percentage}
-          isPositive={card.isPositive}
-          bgColor={card.bgColor}
-          icon={card.icon}
-        />
+          key={index}
+          style={{
+            width: "256px",
+            height: "104px",
+            backgroundColor: stat.bgColor,
+            borderRadius: "12px",
+          }}
+          className="text-white flex items-center"
+        >
+          <div className="flex items-center gap-4 p-4 w-full h-full">
+            <div
+              className="flex items-center justify-center rounded-full w-16 h-16"
+              style={{ backgroundColor: stat.iconBg }}
+            >
+              {stat.icon}
+            </div>
+            <div>
+              <h5 className="text-white text-xl font-semibold">{stat.value}</h5>
+              <p className="text-white text-sm">{stat.title}</p>
+            </div>
+          </div>
+        </Card>
       ))}
     </div>
   );
 };
 
-export default Cards;
+export default DashboardCards;

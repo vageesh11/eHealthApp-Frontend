@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaHome, FaUserAlt, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaUserAlt, FaCog, FaQuestionCircle, FaInbox, FaUserMd, FaCalendarAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 interface SidebarProps {
@@ -13,7 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
   return (
     <div
-      className={`bg-[rgb(13,152,186)] text-white transition-all duration-300 ${expanded ? "w-64" : "w-20"
+      className={`bg-[rgb(13,152,186)] text-white transition-all duration-300 flex flex-col justify-between ${expanded ? "w-64" : "w-20"
         }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -23,29 +23,77 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         <ul>
           {/* Home */}
           <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaHome size={24} />
+            <img
+              src="/images/fi_grid.png"
+              alt="Dashboard Icon"
+              className="w-6 h-6" />
             <span
               className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
                 }`}
             >
-              Home
+              Dashboard
             </span>
           </li>
 
           {/* Profile → Opens Appointment page */}
           <li>
             <Link
-              to="/appointment"   // <-- changed this to your Appointment route
+              to="/appointment"
               className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer"
             >
-              <FaUserAlt size={24} />
+              <FaCalendarAlt size={24} />
               <span
                 className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
                   }`}
               >
-                Profile
+                Appointments
               </span>
             </Link>
+          </li>
+
+          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
+            <FaUserAlt size={24} />
+            <span
+              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
+                }`}
+            >
+              Patients
+            </span>
+          </li>
+
+          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
+            <FaUserMd size={24} />
+            <span
+              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
+                }`}
+            >
+              Doctors
+            </span>
+          </li>
+
+          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
+            <FaInbox size={24} />
+            <span
+              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
+                }`}
+            >
+              Inbox
+            </span>
+          </li>
+        </ul>
+      </nav>
+
+
+      <nav className="mb-6">
+        <ul>
+          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
+            <FaQuestionCircle size={24} />
+            <span
+              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
+                }`}
+            >
+              Help
+            </span>
           </li>
 
           {/* Settings */}
@@ -59,16 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             </span>
           </li>
 
-          {/* Logout */}
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaSignOutAlt size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Logout
-            </span>
-          </li>
+
         </ul>
       </nav>
     </div>

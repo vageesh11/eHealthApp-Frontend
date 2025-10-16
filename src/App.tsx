@@ -13,7 +13,7 @@ import Searchbar from "./components/Searchbar";
 import Login from "./components/Login";
 import Appointment from "./pages/Appointment";
 import Tooltip from "./components/Tooltip";
-
+import Dashboard from "./components/Dashboard";
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -95,6 +95,10 @@ const App: React.FC = () => {
 
                     <div className="mt-8">
                       <Cards />
+                    </div>
+
+                     <div className="mt-8">
+                      <Dashboard />
                     </div>
 
                     <div className="mt-8">
