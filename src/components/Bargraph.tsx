@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -15,6 +15,8 @@ import Calendar from "./Calendar";
 import {BAR_GRAPH_DATA,BAR_LEGEND,Y_AXIS_TICKS,Y_AXIS_DOMAIN,} from "../utils/BargraphConstants";
 
 const Bargraph = () => {
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 max-w-4xl mx-auto">
       
@@ -23,7 +25,7 @@ const Bargraph = () => {
         <Title text="Financial Overview" />
         <div className="flex items-center gap-4">
           <Dropdown />
-          <Calendar />
+          <Calendar selectedDate={selectedDate} onDateChange={setSelectedDate}/>
         </div>
       </div>
 

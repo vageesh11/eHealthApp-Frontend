@@ -1,37 +1,58 @@
 import React from "react";
-import { FaBars, FaBell, FaUserCircle } from "react-icons/fa";
 
 interface HeaderProps {
-  toggleSidebar: () => void;
+  toggleSidebar?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   return (
-    <header className="bg-[rgb(13,152,186)] w-full">
+    <header className="bg-gray-100 w-full"> 
+    {/* shadow-sm */}
+      <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 flex justify-between items-center">
 
-      <div className="px-3 sm:px-6 md:px-8 py-3 sm:py-4 flex justify-between items-center">
+        
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          <img
+            src="/images/fi_sidebar.svg"
+            alt="Sidebar Icon"
+            className="cursor-pointer object-contain"
+            style={{ width: "25px", height: "25px" }}
+          // onClick={toggleSidebar}
+          />
 
-        {/* Left: Sidebar toggle + Logo */}
-        <div className="flex items-center space-x-2 sm:space-x-4 text-white">
-          <button
-            onClick={toggleSidebar}
-            className="p-2 sm:p-2.5 rounded-md hover:bg-[rgb(0,109,111)]"
-          >
-            <FaBars className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">eHealthApp</h1>
+
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 truncate">
+            Dashboard
+          </h1>
         </div>
 
-        {/* Right: Icons */}
-        <div className="flex items-center space-x-2 sm:space-x-4 text-white">
-          <div className="p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-[rgb(0,109,111)]">
-            <FaBell className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+        
+        <div className="flex items-center space-x-3 sm:space-x-4">
+         
+          <div className="p-2 sm:p-2.5 bg-white rounded-full cursor-pointer hover:bg-gray-200 flex items-center justify-center">
+            <img
+              src="/images/u_plus.svg"
+              alt="Add Icon"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
           </div>
-          <div className="p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-[rgb(0,109,111)]">
-            <FaUserCircle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-          </div>
-        </div>
 
+         
+          <div className="p-2 sm:p-2.5 bg-white rounded-full cursor-pointer hover:bg-gray-200 flex items-center justify-center">
+            <img
+              src="/images/fi_bell.svg"
+              alt="Notification"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+          </div>
+
+          
+          <img
+            src="/images/Ellipse 1.svg"
+            alt="Profile"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover cursor-pointer"
+          />
+        </div>
       </div>
     </header>
   );

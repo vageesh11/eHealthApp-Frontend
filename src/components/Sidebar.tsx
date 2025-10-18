@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { FaUserAlt, FaCog, FaQuestionCircle, FaInbox, FaUserMd, FaCalendarAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 interface SidebarProps {
@@ -8,106 +7,72 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const expanded = isOpen || isHovered;
 
+  const handleClick = (index: number) => {
+    setActiveIndex(index);
+  };
+
+  const menuItems = [
+    { name: "Dashboard", icon: "/images/fi_grid.svg", path: "/" },
+    { name: "Appointments", icon: "/images/fi_calendar.svg", path: "/appointment" },
+    { name: "Patients", icon: "/images/fi_user.svg", path: "/patients" },
+    { name: "Doctors", icon: "/images/Frame.svg", path: "/doctors" },
+    { name: "Inbox", icon: "/images/fi_inbox.svg", path: "/inbox" },
+  ];
+
+  const bottomItems = [
+    { name: "Help", icon: "/images/fi_help-circle.svg", path: "/help" },
+    { name: "Settings", icon: "/images/fi_settings.svg", path: "/settings" },
+  ];
+
+  const renderMenuItem = (item: typeof menuItems[0], index: number) => {
+    const isActive = activeIndex === index;
+    return (
+      <li key={index} className="flex">
+        <Link
+          to={item.path}
+          onClick={() => handleClick(index)}
+          className={`flex items-center p-4 cursor-pointer w-full transition-colors duration-200 
+            ${isActive ? "bg-gray-200" : "hover:bg-gray-200"}`}
+        >
+          <img
+            src={item.icon}
+            alt={`${item.name} Icon`}
+            className=""
+            style={isActive ? { filter: "invert(35%) sepia(94%) saturate(5151%) hue-rotate(200deg) brightness(95%) contrast(101%)" } : {}}
+          />
+          <span
+            className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"} 
+            ${isActive ? "text-[#016BFF]" : ""}`}
+          >
+            {item.name}
+          </span>
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <div
-      className={`bg-[rgb(13,152,186)] text-white transition-all duration-300 flex flex-col justify-between ${expanded ? "w-64" : "w-20"
-        }`}
+      className={`bg-white text-black transition-all duration-300 flex flex-col justify-between ${expanded ? "w-64" : "w-20"}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-
+      {/* Top Menu */}
       <nav className="mt-6">
         <ul>
-          {/* Home */}
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <img
-              src="/images/fi_grid.png"
-              alt="Dashboard Icon"
-              className="w-6 h-6" />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Dashboard
-            </span>
-          </li>
-
-          {/* Profile → Opens Appointment page */}
-          <li>
-            <Link
-              to="/appointment"
-              className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer"
-            >
-              <FaCalendarAlt size={24} />
-              <span
-                className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                  }`}
-              >
-                Appointments
-              </span>
-            </Link>
-          </li>
-
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaUserAlt size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Patients
-            </span>
-          </li>
-
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaUserMd size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Doctors
-            </span>
-          </li>
-
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaInbox size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Inbox
-            </span>
-          </li>
+          {menuItems.map((item, index) => renderMenuItem(item, index))}
         </ul>
       </nav>
 
-
+      {/* Bottom Menu */}
       <nav className="mb-6">
         <ul>
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaQuestionCircle size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Help
-            </span>
-          </li>
-
-          {/* Settings */}
-          <li className="flex items-center p-4 hover:bg-[rgb(0,109,111)] cursor-pointer">
-            <FaCog size={24} />
-            <span
-              className={`ml-4 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0 hidden"
-                }`}
-            >
-              Settings
-            </span>
-          </li>
-
-
+          {bottomItems.map((item, index) =>
+            renderMenuItem(item, menuItems.length + index)
+          )}
         </ul>
       </nav>
     </div>

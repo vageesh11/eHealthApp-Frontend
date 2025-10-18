@@ -13,7 +13,7 @@ import Searchbar from "./components/Searchbar";
 import Login from "./components/Login";
 import Appointment from "./pages/Appointment";
 import Tooltip from "./components/Tooltip";
-import Dashboard from "./components/Dashboard";
+import DashboardCards from "./components/DashboardCards";
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,7 +45,7 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col bg-gray-100 min-h-screen">
         <Header toggleSidebar={toggleSidebar} />
 
         <div className="flex flex-grow">
@@ -98,7 +98,7 @@ const App: React.FC = () => {
                     </div>
 
                      <div className="mt-8">
-                      <Dashboard />
+                      <DashboardCards />
                     </div>
 
                     <div className="mt-8">
