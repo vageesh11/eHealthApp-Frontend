@@ -2,21 +2,21 @@ import React from "react";
 import { Card } from "react-bootstrap";
 import { cardStats } from "../utils/CardsConstants";
 
-const DashboardCards = () => {
+const Cards = () => {
   return (
-    <div className="flex flex-wrap gap-4 p-4">
+    <div className="flex flex-wrap gap-4 w-full px-4">
       {cardStats.map((stat, index) => (
         <Card
           key={index}
           style={{
-            width: "256px",
             height: "104px",
             backgroundColor: stat.bgColor,
             borderRadius: "12px",
           }}
-          className="text-white flex items-center"
+          className="text-white flex items-center justify-start flex-1 
+                     w-full sm:w-[48%] md:w-[32%] lg:w-[24%]"
         >
-          <div className="flex items-center gap-4 p-4 w-full h-full">
+          <div className="flex items-center gap-4 p-4">
             <div
               className="flex items-center justify-center rounded-full w-16 h-16"
               style={{ backgroundColor: stat.iconBg }}
@@ -34,4 +34,4 @@ const DashboardCards = () => {
   );
 };
 
-export default DashboardCards;
+export default Cards;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Avatar, Card, CardContent, Button, IconButton } from "@mui/material";
+import { Avatar, CardContent, Button } from "@mui/material";
 import { Check, Close } from "@mui/icons-material";
 import Title from "./Title";
 import {
@@ -36,11 +36,10 @@ const DashboardCards: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between rounded-2xl p-4 w-[1190px] h-[488px] pt-4 pr-6 pb-4 pl-6 gap-6 opacity-100">
+    <div className="flex flex-col lg:flex-row justify-between gap-4 w-full">
       {/* Appointment Requests */}
-      
-      <div className="p-[10px] flex flex-col gap-[6px] relative">
-        <div className="w-[361px] h-[40px] flex items-center justify-between px-[6px] opacity-100">
+      <div className="flex flex-col flex-1 gap-[4px]">
+        <div className=" flex items-center justify-between px-[6px] opacity-100 mb-0.5">
           <Title text="Appointment Requests" />
           <Button
             disableRipple
@@ -54,12 +53,13 @@ const DashboardCards: React.FC = () => {
           </Button>
         </div>
 
+         
 
-        <CardContent className="w-[361px] h-[410px] flex flex-col gap-[3px] p-0 rounded-[10px] bg-white relative shadow-sm ">
+        <CardContent className="flex flex-col mb-4 gap-[9px] p-0 rounded-[10px] bg-white shadow-sm flex-1">
           {appointmentRequests.map((p: any, i: number) => (
             <div
               key={i}
-              className="w-[341px] h-[60px] rounded-[16px] flex items-center justify-between gap-[16px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] bg-gray-50 hover:shadow transition"
+              className=" rounded-[16px] flex items-center justify-between gap-[16px] p-[10px_12px] bg-gray-50 hover:shadow transition"
             >
               <div className="flex items-center gap-3">
                 {p.img ? (
@@ -88,20 +88,22 @@ const DashboardCards: React.FC = () => {
                 <Button
                   size="small"
                   onClick={() => handleAcceptToggle(i)}
-                  className={`!min-w-0 !p-2 !rounded-md !w-8 !h-8 flex items-center justify-center border transition ${accepted[i]
-                    ? "!bg-green-400 !text-white !border-green-600"
-                    : "!bg-gray-100 !text-gray-500 !border-gray-300"
-                    }`}
+                  className={`!min-w-0 !p-2 !rounded-md !w-8 !h-8 flex items-center justify-center border transition ${
+                    accepted[i]
+                      ? "!bg-green-400 !text-white !border-green-600"
+                      : "!bg-gray-100 !text-gray-500 !border-gray-300"
+                  }`}
                 >
                   <Check fontSize="small" />
                 </Button>
                 <Button
                   size="small"
                   onClick={() => handleRejectToggle(i)}
-                  className={`!min-w-0 !p-2 !rounded-md !w-8 !h-8 flex items-center justify-center border transition ${rejected[i]
-                    ? "!bg-red-400 !text-white !border-red-600"
-                    : "!bg-gray-100 !text-gray-500 !border-gray-300"
-                    }`}
+                  className={`!min-w-0 !p-2 !rounded-md !w-8 !h-8 flex items-center justify-center border transition ${
+                    rejected[i]
+                      ? "!bg-red-400 !text-white !border-red-600"
+                      : "!bg-gray-100 !text-gray-500 !border-gray-300"
+                  }`}
                 >
                   <Close fontSize="small" />
                 </Button>
@@ -110,31 +112,28 @@ const DashboardCards: React.FC = () => {
           ))}
         </CardContent>
       </div>
-      
 
       {/* Yearly Summary */}
-      
-      <div className="p-[10px] flex flex-col gap-[6px] relative">
-        <div className="w-[361px] h-[40px] flex items-center px-[6px] py-[4px]">
+      <div className="flex flex-col flex-1 ">
+        <div className=" flex items-center px-[4px] py-[4px] pt-4 mb-4 h-[40px]">
           <Title text="Yearly Summary" />
         </div>
 
-        <CardContent className="flex flex-col gap-[6px] p-0 bg-white rounded-[10px] shadow-sm w-[361px] h-[407px]">
+        <CardContent className="flex flex-col gap-[8px] mb-4 bg-white rounded-[10px] shadow-sm flex-1">
           {yearlySummary.map((item: any, i: number) => (
             <div
               key={i}
-              className="w-[341px] h-[121px] rounded-[16px] flex items-center gap-[36px] p-[27px_24px] bg-gray-50 hover:shadow transition"
+              className="rounded-[16px] flex items-center gap-[36px] p-[27px_24px] bg-gray-50 hover:shadow transition"
             >
               <div className={`w-16 h-16 ${item.iconBg} rounded-full flex items-center justify-center`}>
                 {item.icon}
               </div>
 
-              {/* Summary Info */}
               <div className="flex flex-col">
                 <h3 className="text-2xl font-bold">{item.count}</h3>
                 <p className="text-lg text-gray-400 font-medium">{item.title}</p>
                 <div className="flex flex-row gap-3">
-                  <p className="text-xs text-green-600">{item.change}</p>
+                  <p className="text-xs text-green-400 font-bold">{item.change}</p>
                   <p className="text-xs text-gray-400">{item.change1}</p>
                 </div>
               </div>
@@ -143,10 +142,9 @@ const DashboardCards: React.FC = () => {
         </CardContent>
       </div>
 
-
       {/* Today's Appointments */}
-      <div className="p-[10px] flex flex-col gap-[6px] relative">
-        <div className="w-[361px] h-[40px] flex items-center justify-between px-[6px] py-[4px]">
+      <div className="flex flex-col flex-1">
+        <div className=" flex items-center justify-between px-[6px] py-[4px] mb-0.5">
           <Title text="Today's Appointment" />
           <Button
             size="small"
@@ -160,11 +158,11 @@ const DashboardCards: React.FC = () => {
           </Button>
         </div>
 
-        <CardContent className="flex flex-col gap-[6px] p-0 bg-white rounded-[10px] shadow-sm w-[361px] h-[410px]">
+        <CardContent className="flex flex-col gap-[9px] mb-4 p-0 bg-white rounded-[10px] shadow-sm flex-1">
           {todayAppointments.map((p: any, i: number) => (
             <div
               key={i}
-              className="w-[341px] h-[60px] rounded-[16px] flex items-center justify-between gap-[16px] p-[10px_12px] bg-gray-50 hover:shadow transition"
+              className="rounded-[16px] flex items-center justify-between gap-[16px] p-[10px_12px] bg-gray-50 hover:shadow transition"
             >
               <div className="flex items-center gap-3">
                 {p.img ? (
@@ -188,8 +186,9 @@ const DashboardCards: React.FC = () => {
               </div>
 
               <p
-                className={`text-xs ${p.ongoing ? "text-blue-600 font-semibold" : "text-gray-500"
-                  }`}
+                className={`text-xs ${
+                  p.ongoing ? "text-blue-600 font-semibold" : "text-gray-500"
+                }`}
               >
                 {p.time}
               </p>
@@ -197,7 +196,6 @@ const DashboardCards: React.FC = () => {
           ))}
         </CardContent>
       </div>
-
     </div>
   );
 };
