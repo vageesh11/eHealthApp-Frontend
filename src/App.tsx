@@ -3,9 +3,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Sidebar from "./components/Sidebar";
+// import Breadcrumbs from "./components/Breadcrumbs";
+
 import Dashboard from "./pages/Dashboard";
 import Appointment from "./pages/Appointment";
-import Home from "./pages/Home"; 
+import Home from "./pages/Home";
+
+
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -19,6 +23,7 @@ const App: React.FC = () => {
         {/* Header */}
         <Header sidebarExpanded={sidebarExpanded} />
 
+
         <div className="flex flex-grow transition-all duration-300">
           {/* Sidebar */}
           <Sidebar
@@ -26,27 +31,26 @@ const App: React.FC = () => {
             onExpandChange={(expanded: boolean) => setSidebarExpanded(expanded)}
           />
 
-        
+
           <div
-            className={`flex-1 p-4 transition-all duration-300 ${
-              sidebarExpanded ? "ml-[256px]" : "ml-[80px]"
-            }`}
+            className={`flex-1 p-4 transition-all duration-300 ${sidebarExpanded ? "ml-[180px]" : "ml-[60px]"
+              }`}
           >
             <Routes>
-              
+
               {/* <Route path="/" element={<Dashboard />} /> */}
               <Route path="/dashboard" element={<Dashboard />} />
 
-              
+
               <Route path="/appointment" element={<Appointment />} />
 
-              
+
               <Route path="/home" element={<Home />} />
             </Routes>
           </div>
         </div>
 
-       
+
         <Footer />
       </div>
     </BrowserRouter>

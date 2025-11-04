@@ -1,182 +1,68 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface PopupProps {
-  isOpen: boolean;
+  event: any;
+  position: { top: number; left: number };
   onClose: () => void;
-  onSave: (data: { title: string; location?: string; time: string }) => void;
-  selectedTime: string;
-  selectedDate: Date | null;
-  position: { top: number; left: number }; 
-  viewportWidth: number; 
 }
 
-const Popup: React.FC<PopupProps> = ({
-  isOpen,
-  onClose,
-  onSave,
-  selectedTime,
-  selectedDate,
-  position,
-  viewportWidth,
-}) => {
-  const [title, setTitle] = useState("");
-  const [location, setLocation] = useState("");
-  const [timeFirstHalf, setTimeFirstHalf] = useState(selectedTime || "");
-  const [timeSecondHalf, setTimeSecondHalf] = useState("");
+const Popup: React.FC<PopupProps> = ({ event, position, onClose }) => {
+  const popupRef = useRef<HTMLDivElement>(null);
 
-  const [openBelow, setOpenBelow] = useState(false);
-  const [openLeft, setOpenLeft] = useState(false);
-
+  // 🧠 Close popup if clicked outside
   useEffect(() => {
-    setTimeFirstHalf(selectedTime || "");
-    setTimeSecondHalf("");
+    const handleClickOutside = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
 
-   
-    const viewportHeight = window.innerHeight;
-    if (position.top < 200) setOpenBelow(true);
-    else if (viewportHeight - position.top < 250) setOpenBelow(false);
-    else setOpenBelow(false);
-
-    
-    const popupWidth = 288; 
-    if (position.left + popupWidth > viewportWidth - 16) setOpenLeft(true);
-    else setOpenLeft(false);
-  }, [selectedTime, isOpen, position, viewportWidth]);
-
-  if (!isOpen) return null;
-
-  const handleSave = () => {
-    if (!title.trim()) {
-      alert("Please enter a title");
-      return;
-    }
-    const finalTime = timeFirstHalf || timeSecondHalf || selectedTime;
-    onSave({ title, location, time: finalTime });
-    setTitle("");
-    setLocation("");
-    setTimeFirstHalf("");
-    setTimeSecondHalf("");
-  };
-
-  const generateTimeOptions = (baseHour: number, baseMinute: number) => {
-    const base = new Date();
-    base.setHours(baseHour);
-    base.setMinutes(baseMinute);
-    const times: string[] = [];
-    for (let i = 1; i <= 6; i++) {
-      const next = new Date(base.getTime() + i * 5 * 60000);
-      const hh = next.getHours().toString().padStart(2, "0");
-      const mm = next.getMinutes().toString().padStart(2, "0");
-      times.push(`${hh}:${mm}`);
-    }
-    return times;
-  };
-
-  const [clickedHour] = selectedTime.split(":").map(Number);
-  const firstHalf = generateTimeOptions(clickedHour, 0);
-  const secondHalf = generateTimeOptions(clickedHour, 30);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   return (
     <div
-      className="absolute z-[9999]"
+      ref={popupRef}
+      className="fixed bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-[9999] w-72"
       style={{
-        top: openBelow ? position.top + 25 : position.top,
-        left: openLeft ? position.left - 288 + 8 : position.left,
-        transform: openBelow ? "translateY(0)" : "translateY(-100%)",
+        top: position.top,
+        left: position.left,
+        transform: "translate(-50%, 0)",
       }}
     >
-      <div className="bg-white rounded-xl shadow-xl p-4 w-72 border border-gray-200">
-        <h2 className="text-base font-semibold mb-3 text-gray-800 text-center">
-          Add Event
-        </h2>
-
-        {selectedDate && (
-          <p className="text-xs text-gray-600 mb-2 text-center">
-            {selectedDate.toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
-        )}
-
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Title
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Event title"
-          className="w-full border border-gray-300 rounded-md p-1.5 mb-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
-        />
-
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Location
-        </label>
-        <input
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Location (optional)"
-          className="w-full border border-gray-300 rounded-md p-1.5 mb-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
-        />
-
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Time (first half)
-        </label>
-        <select
-          value={timeFirstHalf}
-          onChange={(e) => setTimeFirstHalf(e.target.value)}
-          className="w-full border border-gray-300 rounded-md p-1.5 mb-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
-        >
-          <option value={`${clickedHour.toString().padStart(2, "0")}:00`}>
-            {`${clickedHour.toString().padStart(2, "0")}:00`}
-          </option>
-          {firstHalf.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Time (second half)
-        </label>
-        <select
-          value={timeSecondHalf}
-          onChange={(e) => setTimeSecondHalf(e.target.value)}
-          className="w-full border border-gray-300 rounded-md p-1.5 mb-4 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
-        >
-          <option value={`${clickedHour.toString().padStart(2, "0")}:30`}>
-            {`${clickedHour.toString().padStart(2, "0")}:30`}
-          </option>
-          {secondHalf.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-3 py-1 rounded-md bg-gray-300 hover:bg-gray-400 text-sm transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm transition"
-          >
-            Save
-          </button>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h3 className="font-semibold text-gray-900">{event.patientName}</h3>
+          <p className="text-xs text-gray-500">{event.patientId}</p>
         </div>
+
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <img
+            src="/images/x-01.svg"
+            alt="Close"
+            className="w-5 h-5 mr-1"
+          />
+        </button>
+      </div>
+
+      <p className="text-sm font-medium text-gray-700">
+        {event.fromTime} - {event.toTime}
+      </p>
+      <p className="text-sm text-gray-600 mt-2">{event.reason}</p>
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button className="text-gray-500 font-medium text-sm">Cancel</button>
+        <button className="text-blue-600 font-semibold text-sm">Reschedule</button>
       </div>
     </div>
   );
 };
 
 export default Popup;
+

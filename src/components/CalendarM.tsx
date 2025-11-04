@@ -1,232 +1,498 @@
-import React, { useState, useMemo } from "react";
-import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaCalendarAlt,
-  FaChevronDown,
-  FaRegCalendarAlt,
-  FaBriefcase,
-  FaCalendarWeek,
-} from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaChevronLeft, FaChevronRight, FaChevronDown } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Popup from "./Popup";
-
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../store/store";
 import { Event, addEvent } from "../store/calendarSlice";
+import AppointmentModal from "../modals/AppointmentModal";
 
 const CalendarM: React.FC = () => {
-  const [view, setView] = useState<"Day" | "Work Week" | "Month">("Day");
+  const [view, setView] = useState<"Day" | "Week" | "Month">("Day");
   const [startDate, setStartDate] = useState<Date>(new Date());
-  const [openRightDropdown, setOpenRightDropdown] = useState(false);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedTime, setSelectedTime] = useState<string>(""); // HH:mm
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPosition, setModalPosition] = useState<{ top: number; left: number } | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [isFromCellClick, setIsFromCellClick] = useState(false);
+  const [clickedPosition, setClickedPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [forceUpdate, setForceUpdate] = useState(false);
+
+  const handleOpenModal = (fromCell = false) => {
+    setIsModalOpen(true);
+    setIsFromCellClick(fromCell);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalPosition(null);
+    setIsFromCellClick(false);
+  };
 
   const dispatch = useDispatch<AppDispatch>();
   const events = useSelector((state: RootState) => state.calendar.events);
-
   const today = new Date();
 
-  const getIcon = (option: "Day" | "Work Week" | "Month") => {
-    switch (option) {
-      case "Day": return <FaRegCalendarAlt className="w-4 h-4 mr-2" />;
-      case "Work Week": return <FaBriefcase className="w-4 h-4 mr-2" />;
-      case "Month": return <FaCalendarWeek className="w-4 h-4 mr-2" />;
-      default: return null;
+  const getEventsForDateAndHour = (date: Date, hour: number) => {
+    return events.filter((event) => {
+      const eventDate = new Date(event.date);
+      const [time, ampm] = event.fromTime.split(" ");
+      let [h] = time.split(":");
+      let eventHour = parseInt(h);
+
+      if (ampm === "PM" && eventHour !== 12) eventHour += 12;
+      if (ampm === "AM" && eventHour === 12) eventHour = 0;
+
+      return (
+        eventDate.toDateString() === date.toDateString() &&
+        eventHour === hour
+      );
+    });
+  };
+
+
+
+
+  useEffect(() => {
+    const updateTime = () => setCurrentTime(new Date());
+    updateTime();
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setCurrentTime(new Date());
+    setForceUpdate((prev) => !prev);
+  }, [view, startDate]);
+
+  useEffect(() => {
+    if (scrollRef.current && (view === "Day" || view === "Week")) {
+      const position =
+        currentTime.getHours() * 64 + (currentTime.getMinutes() / 60) * 64;
+      scrollRef.current.scrollTo({
+        top: Math.max(0, position - 200),
+        behavior: "smooth",
+      });
+    }
+  }, [view, currentTime, forceUpdate]);
+
+  useEffect(() => {
+    const div = scrollRef.current;
+    if (!div) return;
+    let timeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsScrolling(false), 800);
+    };
+    div.addEventListener("scroll", handleScroll);
+    return () => div.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const getStartOfWeek = (d: Date) => {
+    const copy = new Date(d);
+    const day = copy.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    copy.setDate(copy.getDate() + diff);
+    copy.setHours(12, 0, 0, 0);
+    return copy;
+  };
+
+  const addDays = (d: Date, n: number) => {
+    const c = new Date(d);
+    c.setDate(c.getDate() + n);
+    return c;
+  };
+
+  const isoDateKey = (d: Date) => d.toLocaleDateString("en-CA");
+  const formatHour = (hour: number) => hour.toString();
+
+  
+  const handleTimeClick = (hour: number, e: React.MouseEvent, date: Date) => {
+    e.stopPropagation();
+
+    const existingEvents = getEventsForDateAndHour(date, hour);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+    if (existingEvents.length === 0) {
+      // Empty → open AppointmentModal
+      setPopupPosition(null);
+      setSelectedEvent(null);
+      setSelectedDate(date);
+      setSelectedTime(`${hour}:00`);
+      setIsModalOpen(true);
     }
   };
 
-  const formatHour = (hour: number) => hour.toString();
 
-  const isoDateKey = (d: Date) => d.toLocaleDateString("en-CA");
 
-  const handleTimeClick = (hour: number, e: React.MouseEvent<HTMLButtonElement>, day?: Date) => {
-    if (view === "Month") return;
-    const selected = new Date(day || startDate);
-    selected.setHours(hour, 0, 0, 0);
+const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
+  e.stopPropagation();
 
-    const hhmm = `${hour.toString().padStart(2, "0")}:00`;
-    setSelectedTime(hhmm);
-    setSelectedDate(selected);
+  const existingEvents = getEventsForDateAndHour(date, hour);
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPopupPosition({ top: rect.bottom + window.scrollY + 4, left: rect.left + window.scrollX });
-    setIsPopupOpen(true);
-  };
+  if (existingEvents.length > 0) {
+    const event = existingEvents[0];
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
-  const dayKey = isoDateKey(startDate);
-
-  
-  const dayEventsMap = useMemo(() => {
-    const map: { [key: string]: Event[] } = {};
-    events.forEach(e => {
-      if (e.date === dayKey) {
-        const hourKey = e.time; 
-        map[hourKey] = map[hourKey] || [];
-        map[hourKey].push(e);
-      }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setPopupPosition({
+      top: rect.top + window.scrollY + 30,
+      left: rect.left + rect.width + 10,
     });
-    return map;
-  }, [events, dayKey]);
 
-  const workWeekStart = new Date(startDate);
-  const dayOfWeek = workWeekStart.getDay();
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  workWeekStart.setDate(workWeekStart.getDate() + diff);
+    setSelectedEvent(event);
+  }
+};
 
-  const workWeekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(workWeekStart);
-    d.setDate(workWeekStart.getDate() + i);
-    return d;
+  const handleEventClick = (e: React.MouseEvent, event: Event) => {
+  e.stopPropagation();
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+  setPopupPosition({
+    top: rect.top + window.scrollY + rect.height + 10, // 👈 show below event box
+    left: rect.left + rect.width / 2, // 👈 center horizontally
   });
 
-  const workWeekEventsMap = useMemo(() => {
-    const map: { [key: string]: Event[] } = {};
-    events.forEach(e => {
-      map[e.date] = map[e.date] || [];
-      map[e.date].push(e);
-    });
-    return map;
-  }, [events]);
+  setSelectedEvent(event);
+};
 
-  // --- Render Day View ---
-  const renderDayView = () => (
-    <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
-      <div className="bg-gray-200 py-3 px-4 flex flex-col items-start">
-        <span className="text-4xl text-gray-900">{startDate.getDate()}</span>
-        <span className="text-lg text-gray-700">{startDate.toLocaleDateString("en-US", { weekday: "long" })}</span>
-      </div>
-      <div className="divide-y divide-gray-300">
-        {hours.map(hour => {
-          const isToday =
-            startDate.getFullYear() === today.getFullYear() &&
-            startDate.getMonth() === today.getMonth() &&
-            startDate.getDate() === today.getDate();
 
-          // Get all events for this hour (full HH:mm match)
-          const hourEvents = Object.keys(dayEventsMap)
-            .filter(k => k.startsWith(hour.toString().padStart(2, "0")))
-            .flatMap(k => dayEventsMap[k] || []);
 
-          return (
-            <button
-              key={hour}
-              onClick={(e) => handleTimeClick(hour, e)}
-              className={`flex h-20 w-full relative transition ${isToday ? "bg-pink-50 hover:bg-pink-100" : "hover:bg-blue-100"}`}
-            >
-              <div className="w-16 text-right pr-3 text-gray-600 text-sm">{formatHour(hour)}</div>
-              <div className="flex-1 border-l border-gray-300 h-full relative bg-white">
-                {hourEvents.map(ev => (
-                  <div key={ev.id} className="absolute inset-0 bg-pink-200 text-xs p-1 rounded flex items-center justify-start">
-                    {ev.title} {ev.location && `@ ${ev.location}`}
-                  </div>
-                ))}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const workWeekStart = getStartOfWeek(startDate);
+  const workWeekDays = Array.from({ length: 7 }, (_, i) => addDays(workWeekStart, i));
 
-  // --- Render Work Week View ---
-  const renderWorkWeekView = () => (
-    <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
-      <div className="grid grid-cols-8 border-b border-gray-300 bg-gray-100">
-        <div className="p-2 text-center font-bold text-gray-700 border-r border-gray-300">Time</div>
-        {workWeekDays.map(day => {
-          const isToday = day.getFullYear() === today.getFullYear() &&
-            day.getMonth() === today.getMonth() &&
-            day.getDate() === today.getDate();
-          return (
-            <div key={day.toDateString()} className={`p-2 text-center font-semibold text-gray-700 border-r border-gray-300 ${isToday ? "bg-pink-200 rounded" : ""}`}>
-              {day.toLocaleDateString("en-US", { weekday: "short", day: "numeric" })}
-            </div>
-          );
-        })}
-      </div>
-      <div className="divide-y divide-gray-300">
-        {hours.map(hour => (
-          <div key={hour} className="grid grid-cols-8 h-16">
-            <div className="flex justify-center text-sm text-gray-600 border-r border-gray-300">{formatHour(hour)}</div>
-            {workWeekDays.map(day => {
-              const dateKey = isoDateKey(day);
-              const hourEvents = (workWeekEventsMap[dateKey] || []).filter(e => {
-                const [h, m] = e.time.split(":").map(Number);
-                return h === hour;
-              });
-
-              const isToday = day.getFullYear() === today.getFullYear() &&
-                day.getMonth() === today.getMonth() &&
-                day.getDate() === today.getDate();
-
-              return (
-                <button
-                  key={day.toDateString() + hour}
-                  onClick={(e) => handleTimeClick(hour, e, day)}
-                  className={`border-r border-gray-300 relative transition ${isToday ? "bg-pink-50 hover:bg-pink-100" : "hover:bg-blue-100"}`}
-                >
-                  {hourEvents.map(ev => (
-                    <div key={ev.id} className="absolute inset-0 bg-pink-200 text-xs p-1 rounded flex items-center justify-start">
-                      {ev.title} {ev.location && `@ ${ev.location}`}
-                    </div>
-                  ))}
-                </button>
-              );
-            })}
+  // ---- DAY VIEW ----
+  const renderDayView = () => {
+    const linePosition = currentTime.getHours() * 64 + (currentTime.getMinutes() / 60) * 64;
+    return (
+      <div key={`day-view-${forceUpdate}`}
+        className="mt-2 border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+        <div className="grid grid-cols-[4rem_1fr] border-b border-gray-300 bg-white sticky top-0 z-10">
+          <div className="w-16 h-16 flex items-center justify-center border-r border-gray-300">
+            <img src="/images/Icon.svg" alt="Clock Icon" className="w-6 h-6" />
           </div>
-        ))}
-      </div>
-    </div>
-  );
+          <div className="flex items-center justify-center bg-black text-white font-semibold tracking-wide rounded-tr-lg text-sm sm:text-base">
+            {startDate.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()} -{" "}
+            {String(startDate.getDate()).padStart(2, "0")}
+          </div>
+        </div>
 
-  // --- Render Month View ---
+        <div
+          ref={scrollRef}
+          className="relative overflow-y-auto h-[calc(100vh-340px)] sm:h-[calc(100vh-320px)] lg:h-[calc(100vh-247px)] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-thumb-gray-500"
+        >
+          <div className="relative">
+            {startDate.toDateString() === currentTime.toDateString() && (
+              <div
+                key={`${view}-${forceUpdate}`}
+                className="absolute left-[4rem] right-0 h-0.5 bg-red-500 z-20"
+                style={{ top: `${linePosition}px` }}>
+                <div
+                  className="absolute -left-2 top-1/2 -translate-y-1/2"
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderTop: "6px solid transparent",
+                    borderBottom: "6px solid transparent",
+                    borderRight: "8px solid #ef4444",
+                  }}
+                />
+              </div>
+            )}
+
+            {hours.map((hour) => (
+              <div key={hour}
+                onClick={(e) => handleHourCellClick(startDate, hour, e)}
+                className="grid grid-cols-[4rem_1fr] h-16 border-b border-gray-200">
+                <div className="flex items-center justify-center text-[11px] sm:text-sm text-gray-600 border-r border-gray-300">
+                  {formatHour(hour)}
+                </div>
+                <div className="relative w-full h-full hover:bg-gray-100">
+                  {/* Render all events for this hour */}
+                  {getEventsForDateAndHour(startDate, hour).map((event) => (
+                    <div
+                      key={event.id}
+                      onClick={(e) => handleEventClick(e, event)}
+                      className="absolute inset-x-0 h-full top-0 rounded-lg px-4 py-2 text-sm flex flex-col border-4 shadow-sm"
+                      style={{
+                        borderColor: event.colorBorder,
+                        backgroundColor: event.colorBg,
+                      }}
+                    >
+                      
+                      <div className="flex items-center justify-start gap-0 text-xs font-semibold text-gray-700 mb-1">
+                        <span>{event.fromTime}</span>
+                        <img
+                          src="/images/fi_arrow-right.svg"
+                          alt="arrow"
+                          className="w-3 h-3 mx-1"
+                        />
+                        <span>{event.toTime}</span>
+                      </div>
+
+                     
+                      <div className="flex items-center justify-between relative">
+
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center justify-center rounded-full text-white text-xs font-semibold w-6 h-6"
+                            style={{ backgroundColor: event.colorBorder }}
+                          >
+                            {event.patientName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </div>
+
+                          {/* Visit Type */}
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                            <span className="text-[10px] font-semibold text-gray-900">
+                              {event.visitType}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Mode Icon (centered vertically) */}
+
+                      </div>
+                      <div className="absolute right-2 top-7 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm">
+                        <img
+                          src={
+                            event.visitMode === "Online"
+                              ? "/images/fi_video.svg"
+                              : "/images/Frame (1).svg"
+                          }
+                          alt="mode"
+                          className="w-6 h-6"
+                        />
+                      </div>
+                    </div>
+
+
+                  ))}
+                </div>
+
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ---- WEEK VIEW ----
+  const renderWeekView = () => {
+    const todayKey = new Date().toDateString();
+    const linePosition = currentTime.getHours() * 64 + (currentTime.getMinutes() / 60) * 64;
+
+    return (
+      <div className="mt-2 border border-gray-200 rounded-lg bg-white shadow-sm">
+        <div className="grid grid-cols-[4rem_repeat(7,1fr)] border-b border-gray-200 bg-white sticky top-0 z-10" style={{ width: "calc(100% - 8px)" }}>
+          <div className="h-16 flex items-center justify-center border-r border-gray-200 bg-white">
+            <img src="/images/Icon.svg" alt="Clock Icon" className="w-6 h-6" />
+          </div>
+
+          {workWeekDays.map((day, idx) => {
+            const isToday = day.toDateString() === todayKey;
+            return (
+              <div
+                key={day.toDateString()}
+                className={`flex items-center justify-center h-16 font-semibold tracking-wide text-sm sm:text-base border-r border-gray-200 ${idx === workWeekDays.length - 1 ? "last:border-r-0" : ""
+                  } ${isToday ? "bg-black text-white" : "bg-white text-gray-600"}`}
+              >
+                {day.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()} -{" "}
+                {String(day.getDate()).padStart(2, "0")}
+              </div>
+            );
+          })}
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="relative overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-thumb-gray-500
+          h-[calc(100vh-340px)] sm:h-[calc(100vh-320px)] lg:h-[calc(100vh-247px)]"
+        >
+          <div
+            className="absolute left-[4rem] right-0 h-0.5 bg-red-500 z-20 pointer-events-none"
+            style={{ top: `${linePosition}px` }}
+          >
+            <div
+              className="absolute -left-2 top-1/2 -translate-y-1/2"
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "6px solid transparent",
+                borderBottom: "6px solid transparent",
+                borderRight: "8px solid #ef4444",
+              }}
+            />
+          </div>
+
+          {hours.map((hour) => (
+            <div key={hour} className="grid grid-cols-[4rem_repeat(7,1fr)] h-16 border-b border-gray-200">
+              <div className="flex items-center justify-center text-[11px] sm:text-sm text-gray-600 border-r border-gray-200 bg-white">
+                {formatHour(hour)}
+              </div>
+             {workWeekDays.map((day, colIdx) => (
+  <div
+    key={`${day.toDateString()}-${hour}`}
+    onClick={(e) => handleTimeClick(hour, e, day)} // 👉 for empty cell
+    className={`relative w-full h-full border-r border-gray-200 hover:bg-gray-100 ${colIdx === workWeekDays.length - 1 ? "last:border-r-0" : ""}`}
+  >
+    {getEventsForDateAndHour(day, hour).map((event) => (
+      <div
+        key={event.id}
+        onClick={(e) => handleHourCellClick(day, hour, e)} // 👉 for filled cell
+        className="absolute inset-x-0 h-full top-0 rounded-lg px-3 py-2 text-sm flex flex-col border-4 shadow-sm cursor-pointer"
+        style={{
+          borderColor: event.colorBorder,
+          backgroundColor: event.colorBg,
+        }}
+      >
+        <div className="flex items-center justify-start gap-0 text-xs font-semibold text-gray-700 mb-1">
+          <span>{event.fromTime}</span>
+          <img src="/images/fi_arrow-right.svg" alt="arrow" className="w-3 h-3 mx-1" />
+          <span>{event.toTime}</span>
+        </div>
+
+        <div className="flex items-center justify-between relative">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center justify-center rounded-full text-[11px] text-white font-semibold w-6 h-6"
+              style={{ backgroundColor: event.colorBorder }}
+            >
+              {event.patientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+              <span className="text-[6px] font-semibold text-gray-900">{event.visitType}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm">
+          <img
+            src={event.visitMode === "Online" ? "/images/fi_video.svg" : "/images/Frame (1).svg"}
+            alt="mode"
+            className="w-3.5 h-3.5"
+          />
+        </div>
+      </div>
+    ))}
+  </div>
+))}
+
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+
   const renderMonthView = () => {
     const year = startDate.getFullYear();
     const month = startDate.getMonth();
-
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
+    const startWeekDay = (firstDay.getDay() + 6) % 7;
 
     const days: Date[] = [];
-    const startWeekDay = firstDay.getDay();
+
 
     for (let i = startWeekDay; i > 0; i--) {
-      const d = new Date(year, month, 1 - i);
-      d.setHours(12);
-      days.push(d);
+      days.push(new Date(year, month, 1 - i));
     }
 
+    // Current month days
     for (let d = 1; d <= lastDay.getDate(); d++) {
-      const date = new Date(year, month, d);
-      date.setHours(12);
-      days.push(date);
+      days.push(new Date(year, month, d));
     }
 
+    // Next month's leading days
     while (days.length % 7 !== 0) {
-      const nextDay = days.length - startWeekDay - lastDay.getDate() + 1;
-      const d = new Date(year, month + 1, nextDay);
-      d.setHours(12);
-      days.push(d);
+      const nextDay = new Date(
+        year,
+        month + 1,
+        days.length - startWeekDay - lastDay.getDate() + 1
+      );
+      days.push(nextDay);
     }
+
+    const today = new Date();
+    const totalWeeks = days.length / 7;
 
     return (
-      <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-7 bg-gray-200 text-center font-bold">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => <div key={day} className="p-2">{day}</div>)}
+      <div className="mt-2 border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm flex flex-col">
+        {/* Header */}
+        <div className="grid grid-cols-7 h-16 border-b border-gray-300 bg-gray-100 sticky top-0 z-10">
+          {[
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+            "SUNDAY",
+          ].map((day) => (
+            <div
+              key={day}
+              className="flex items-center justify-center font-semibold text-[12px] sm:text-sm text-gray-500 border-r border-gray-200 last:border-r-0 h-16"
+            >
+              {day}
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-7">
+
+        {/* Month Grid */}
+        <div
+          className="grid border-t border-gray-200"
+          style={{
+            gridTemplateColumns: "repeat(7, minmax(90px, 1fr))",
+            height: "calc(100vh - 247px)",
+          }}
+        >
           {days.map((day, idx) => {
-            const isToday = day.getFullYear() === today.getFullYear() &&
+            const isCurrentMonth = day.getMonth() === month;
+            const isToday =
+              day.getFullYear() === today.getFullYear() &&
               day.getMonth() === today.getMonth() &&
               day.getDate() === today.getDate();
+
             return (
-              <div key={idx} className={`p-4 h-20 border border-gray-300 ${day.getMonth() !== month ? "bg-gray-100 text-gray-400" : ""} ${isToday ? "bg-pink-200" : ""}`}>
-                <div className="flex justify-between">{day.getDate()}</div>
+              <div
+                key={idx}
+                className={`p-2 flex flex-col justify-start items-start border-b border-r border-gray-200 last:border-r-0 transition-colors duration-200 ${isCurrentMonth
+                  ? "bg-white hover:bg-gray-50 cursor-pointer"
+                  : "bg-gray-50 text-gray-400"
+                  }`}
+              >
+                <div className="w-full flex justify-start">
+                  {isToday ? (
+                    <div
+                      className="w-6 h-6 flex items-center justify-center text-blue-500 rounded-full text-sm font-semibold"
+                      style={{ backgroundColor: "#64A4FF26" }}
+                    >
+                      {String(day.getDate()).padStart(2, "0")}
+                    </div>
+                  ) : (
+                    <div className="text-sm font-medium text-gray-700">
+                      {String(day.getDate()).padStart(2, "0")}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -235,93 +501,212 @@ const CalendarM: React.FC = () => {
     );
   };
 
+
+
+  // ---- Navigation & Controls ----
   const handleDateChange = (direction: "prev" | "next") => {
-    setStartDate(prev => {
-      const newDate = new Date(prev);
-      if (view === "Day") newDate.setDate(prev.getDate() + (direction === "next" ? 1 : -1));
-      else if (view === "Work Week") newDate.setDate(prev.getDate() + (direction === "next" ? 7 : -7));
-      else if (view === "Month") newDate.setMonth(prev.getMonth() + (direction === "next" ? 1 : -1));
-      return newDate;
+    setStartDate((prev) => {
+      if (view === "Day") {
+        const d = new Date(prev);
+        d.setDate(prev.getDate() + (direction === "next" ? 1 : -1));
+        return d;
+      } else if (view === "Week") {
+        return addDays(getStartOfWeek(prev), direction === "next" ? 7 : -7);
+      } else {
+        const d = new Date(prev);
+        d.setMonth(prev.getMonth() + (direction === "next" ? 1 : -1));
+        return d;
+      }
     });
   };
 
+  const handleTodayClick = () => {
+    const now = new Date();
+    if (view === "Week") setStartDate(getStartOfWeek(now));
+    else setStartDate(now);
+  };
+
+  const handleSetView = (v: "Day" | "Week" | "Month") => {
+    setView(v);
+    if (v === "Week") setStartDate((prev) => getStartOfWeek(prev));
+  };
+
+  // ---- DATE PICKER TEXT FIX ----
+  const formatDatePickerText = () => {
+    if (view === "Day") {
+      return startDate.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      }) + ` ${String(startDate.getDate()).padStart(2, "0")}`;
+    } else if (view === "Week") {
+      const start = getStartOfWeek(startDate);
+      const end = addDays(start, 6);
+      const formatDay = (d: Date) => String(d.getDate()).padStart(2, "0");
+      return `${start.toLocaleDateString("en-US", {
+        month: "short",
+      })} ${formatDay(start)} - ${end.toLocaleDateString("en-US", {
+        month: "short",
+      })} ${formatDay(end)}`;
+    } else {
+      return startDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+  };
+
+  // ---- HEADER ----
   return (
-    <div className="p-4 relative">
-      {/* Header */}
-      <header className="flex justify-between items-center bg-gray-500 text-white px-4 py-2 shadow-md rounded-xl">
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-3 py-1 rounded-xl bg-gray-500 hover:bg-gray-700" onClick={() => setStartDate(new Date())}>
-            <FaCalendarAlt className="w-4 h-4" />Today
+    <div className="relative">
+      <header className="flex justify-between items-center text-white px-1 py-2">
+        <div className="flex items-center gap-2">
+          <button onClick={() => setStartDate(new Date())} className="w-[100px] h-[50px] rounded-full bg-black text-white text-lg font-medium hover:bg-gray-800">
+            Today
           </button>
-          <button className="p-2 rounded-xl hover:bg-gray-700" onClick={() => handleDateChange("prev")}><FaChevronLeft className="w-4 h-4" /></button>
-          <button className="p-2 rounded-xl hover:bg-gray-700" onClick={() => handleDateChange("next")}><FaChevronRight className="w-4 h-4" /></button>
+
+          <div className="flex bg-white rounded-full shadow-sm border overflow-hidden">
+            {["Day", "Week", "Month"].map((label, index) => {
+              const isActive = view === label;
+              const shapeClass = label === "Day" ? "rounded-l-full" : label === "Month" ? "rounded-r-full" : "rounded-none";
+              return (
+                <React.Fragment key={label}>
+                  <button
+                    onClick={() => setView(label as any)}
+                    className={`px-3 py-1 text-lg font-medium w-[110px] h-[50px] transition-all duration-200 ${isActive ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"
+                      } ${shapeClass}`}
+                  >
+                    {label}
+                  </button>
+                  {index < 2 && <div className="w-[1px] bg-gray-300 h-[50px]" />}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          <button onClick={() => handleDateChange("prev")} className="p-3.5 bg-white rounded-full shadow hover:bg-gray-100 w-[50px] h-[50px]">
+            <FaChevronLeft className="text-black" />
+          </button>
+
 
           <DatePicker
             selected={startDate}
-            onChange={date => setStartDate(date || new Date())}
+            onChange={(d) => setStartDate(d || new Date())}
             dateFormat="MMMM d, yyyy"
-            customInput={<button className="flex items-center gap-1 font-medium">{startDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}<FaChevronDown className="w-3 h-3" /></button>}
-            popperClassName="z-50"
+            customInput={
+              <button className="flex items-center text-lg gap-2 font-medium text-black">
+                {view === "Day" ? (
+                  startDate.toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                ) : view === "Week" ? (
+                  (() => {
+                    const start = getStartOfWeek(startDate);
+                    const end = addDays(start, 6);
+                    const sameMonth = start.getMonth() === end.getMonth();
+
+                    const startMonth = start.toLocaleDateString("en-US", { month: "short" });
+                    const endMonth = end.toLocaleDateString("en-US", { month: "short" });
+                    const year = end.getFullYear();
+
+                    return sameMonth
+                      ? `${startMonth} ${String(start.getDate()).padStart(2, "0")} - ${String(
+                        end.getDate()
+                      ).padStart(2, "0")}, ${year}`
+                      : `${startMonth} ${String(start.getDate()).padStart(2, "0")} - ${endMonth} ${String(
+                        end.getDate()
+                      ).padStart(2, "0")}, ${year}`;
+                  })()
+                ) : (
+                  startDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                )}
+                <FaChevronDown className="w-3 h-3" />
+              </button>
+            }
           />
+
+
+
+          <button onClick={() => handleDateChange("next")} className="p-4 bg-white rounded-full w-[50px] h-[50px] shadow hover:bg-gray-100">
+            <FaChevronRight className="text-black" />
+          </button>
         </div>
 
-       
-        <div className="relative">
-          <button className="flex items-center gap-2 px-3 py-1 rounded-xl bg-gray-500 hover:bg-gray-700" onClick={() => setOpenRightDropdown(prev => !prev)}>
-            {getIcon(view)}{view}<FaChevronDown className={`w-3 h-3 transition-transform ${openRightDropdown ? "rotate-180" : ""}`} />
-          </button>
-          {openRightDropdown && (
-            <div className="absolute right-0 mt-2 bg-gray-500 rounded-xl shadow-lg z-50 min-w-[160px]">
-              {(["Day", "Work Week", "Month"] as const).map(option => (
-                <button key={option} className="flex items-center w-full px-4 py-2 hover:bg-gray-700" onClick={() => { setView(option); setOpenRightDropdown(false); }}>
-                  {getIcon(option)}{option}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <button
+          className="flex items-center gap-4 bg-[#168BD9] h-[50px] hover:bg-[#0f78be] text-white font-semibold text-lg px-4 py-2 rounded-full shadow transition-all duration-200"
+          onClick={() => handleOpenModal(false)}
+
+        >
+          <img src="/images/u_plus-circle.svg" alt="Add Icon" className="w-6 h-6" />
+          Add Appointment
+        </button>
       </header>
 
-      {/* Views */}
       {view === "Day" && renderDayView()}
-      {view === "Work Week" && renderWorkWeekView()}
+      {view === "Week" && renderWeekView()}
       {view === "Month" && renderMonthView()}
 
-      {isPopupOpen && selectedDate && (
-  <Popup
-    isOpen={isPopupOpen}
-    selectedTime={selectedTime}
-    selectedDate={selectedDate}
-    position={popupPosition}
-    viewportWidth={window.innerWidth} 
-    onClose={() => {
-      setIsPopupOpen(false);
-      setSelectedTime("");
-      setSelectedDate(null);
-    }}
-    onSave={(data) => {
-      const usedDate = selectedDate || startDate;
-      dispatch(
-        addEvent({
-          id: Date.now(),
-          title: data.title,
-          date: isoDateKey(usedDate),
-          time: data.time,
-          location: data.location,
-          view: view === "Day" ? "day" : "workweek",
-        } as Event)
-      );
-      setIsPopupOpen(false);
-      setSelectedTime("");
-      setSelectedDate(null);
-    }}
-  />
-)}
+
+      {selectedEvent && popupPosition && (
+            <Popup
+              event={selectedEvent}
+              position={popupPosition}
+              onClose={() => setSelectedEvent(null)}
+            />
+          )}
+
+
+      {isModalOpen && (
+        <>
+          {!isFromCellClick ? (
+
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              onClick={handleCloseModal}
+            >
+              <div className="absolute inset-0 bg-blue-50/60 backdrop-blur-sm"></div>
+              <div
+                className="relative bg-white rounded-2xl shadow-2xl w-[600px] max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <AppointmentModal
+                  onClose={handleCloseModal}
+                  selectedDate={selectedDate}
+                  selectedTime={selectedTime}
+                />
+              </div>
+            </div>
+          ) : (
+
+            <div
+              className="absolute z-50 bg-white rounded-xl shadow-2xl w-[400px] max-h-[90vh] overflow-y-auto border border-gray-200"
+              style={{
+                top: Math.min(modalPosition?.top || 0, window.innerHeight - 500),
+                left: Math.min(modalPosition?.left || 0, window.innerWidth - 420),
+                position: "absolute",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AppointmentModal
+                onClose={handleCloseModal}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+              />
+            </div>
+          )}
+
+          {/* {selectedEvent && popupPosition && (
+            <Popup
+              event={selectedEvent}
+              position={popupPosition}
+              onClose={() => setSelectedEvent(null)}
+            />
+          )} */}
+
+        </>
+      )}
 
     </div>
   );
 };
 
 export default CalendarM;
-
 

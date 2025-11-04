@@ -1,13 +1,21 @@
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Event {
-  id: number;
-  title: string;
-  date: string;   
-  time: string;  
-  location?: string;
-  view: "day" | "workweek";
+  id: string;
+  patientName: string;
+  visitType: string;
+  visitMode: string;
+  date: string;
+  fromTime: string;
+  toTime: string;
+  reason: string;
+  color: string;
+  colorBorder: string; 
+  colorBg: string;  
+  initials: string;
 }
+
 
 interface CalendarState {
   events: Event[];
@@ -24,11 +32,11 @@ const calendarSlice = createSlice({
     addEvent: (state, action: PayloadAction<Event>) => {
       state.events.push(action.payload);
     },
-    deleteEvent: (state, action: PayloadAction<number>) => {
-      state.events = state.events.filter(e => e.id !== action.payload);
+    deleteEvent: (state, action: PayloadAction<string>) => {
+      state.events = state.events.filter((e) => e.id !== action.payload);
     },
     updateEvent: (state, action: PayloadAction<Event>) => {
-      const idx = state.events.findIndex(e => e.id === action.payload.id);
+      const idx = state.events.findIndex((e) => e.id === action.payload.id);
       if (idx !== -1) state.events[idx] = action.payload;
     },
     setEvents: (state, action: PayloadAction<Event[]>) => {
@@ -40,5 +48,11 @@ const calendarSlice = createSlice({
   },
 });
 
-export const { addEvent, deleteEvent, updateEvent, setEvents, clearEvents } = calendarSlice.actions;
+export const {
+  addEvent,
+  deleteEvent,
+  updateEvent,
+  setEvents,
+  clearEvents,
+} = calendarSlice.actions;
 export default calendarSlice.reducer;
