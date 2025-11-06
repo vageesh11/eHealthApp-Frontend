@@ -16,7 +16,6 @@ const CalendarM: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isFromCellClick, setIsFromCellClick] = useState(false);
-  const [clickedPosition, setClickedPosition] = useState<{ x: number; y: number } | null>(null);
 
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
@@ -36,6 +35,7 @@ const CalendarM: React.FC = () => {
     setModalPosition(null);
     setIsFromCellClick(false);
   };
+
 
   const dispatch = useDispatch<AppDispatch>();
   const events = useSelector((state: RootState) => state.calendar.events);
@@ -57,9 +57,6 @@ const CalendarM: React.FC = () => {
       );
     });
   };
-
-
-
 
   useEffect(() => {
     const updateTime = () => setCurrentTime(new Date());
@@ -115,7 +112,7 @@ const CalendarM: React.FC = () => {
   const isoDateKey = (d: Date) => d.toLocaleDateString("en-CA");
   const formatHour = (hour: number) => hour.toString();
 
-  
+
   const handleTimeClick = (hour: number, e: React.MouseEvent, date: Date) => {
     e.stopPropagation();
 
@@ -129,42 +126,49 @@ const CalendarM: React.FC = () => {
       setSelectedDate(date);
       setSelectedTime(`${hour}:00`);
       setIsModalOpen(true);
+      setIsFromCellClick(true);
     }
   };
 
 
 
-const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
-  e.stopPropagation();
+  const handleHourCellClick = (date: Date,  hour: number, e: React.MouseEvent) => {
+    e.stopPropagation();
 
-  const existingEvents = getEventsForDateAndHour(date, hour);
-
-  if (existingEvents.length > 0) {
-    const event = existingEvents[0];
-
+    const existingEvents = getEventsForDateAndHour(date,hour);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+    if (existingEvents.length > 0) {
+
+      const event = existingEvents[0];
+      setPopupPosition({
+        top: rect.top + window.scrollY + 30,
+        left: rect.left + rect.width + 10,
+      });
+      setSelectedEvent(event);
+      setIsModalOpen(false);
+    } else {
+
+      setSelectedDate(date);
+      setSelectedTime(`${hour}:00`);
+      setSelectedEvent(null);
+      setPopupPosition(null);
+      setIsModalOpen(true);
+      setIsFromCellClick(true);
+    }
+  };
+
+  const handleEventClick = (e: React.MouseEvent, event: Event) => {
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
     setPopupPosition({
-      top: rect.top + window.scrollY + 30,
-      left: rect.left + rect.width + 10,
+      top: rect.top + window.scrollY + rect.height + 10,
+      left: rect.left + rect.width / 2,
     });
 
     setSelectedEvent(event);
-  }
-};
-
-  const handleEventClick = (e: React.MouseEvent, event: Event) => {
-  e.stopPropagation();
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-
-  setPopupPosition({
-    top: rect.top + window.scrollY + rect.height + 10, // 👈 show below event box
-    left: rect.left + rect.width / 2, // 👈 center horizontally
-  });
-
-  setSelectedEvent(event);
-};
-
-
+  };
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const workWeekStart = getStartOfWeek(startDate);
@@ -228,7 +232,7 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
                         backgroundColor: event.colorBg,
                       }}
                     >
-                      
+
                       <div className="flex items-center justify-start gap-0 text-xs font-semibold text-gray-700 mb-1">
                         <span>{event.fromTime}</span>
                         <img
@@ -239,7 +243,7 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
                         <span>{event.toTime}</span>
                       </div>
 
-                     
+
                       <div className="flex items-center justify-between relative">
 
                         <div className="flex items-center gap-2">
@@ -344,55 +348,55 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
               <div className="flex items-center justify-center text-[11px] sm:text-sm text-gray-600 border-r border-gray-200 bg-white">
                 {formatHour(hour)}
               </div>
-             {workWeekDays.map((day, colIdx) => (
-  <div
-    key={`${day.toDateString()}-${hour}`}
-    onClick={(e) => handleTimeClick(hour, e, day)} // 👉 for empty cell
-    className={`relative w-full h-full border-r border-gray-200 hover:bg-gray-100 ${colIdx === workWeekDays.length - 1 ? "last:border-r-0" : ""}`}
-  >
-    {getEventsForDateAndHour(day, hour).map((event) => (
-      <div
-        key={event.id}
-        onClick={(e) => handleHourCellClick(day, hour, e)} // 👉 for filled cell
-        className="absolute inset-x-0 h-full top-0 rounded-lg px-3 py-2 text-sm flex flex-col border-4 shadow-sm cursor-pointer"
-        style={{
-          borderColor: event.colorBorder,
-          backgroundColor: event.colorBg,
-        }}
-      >
-        <div className="flex items-center justify-start gap-0 text-xs font-semibold text-gray-700 mb-1">
-          <span>{event.fromTime}</span>
-          <img src="/images/fi_arrow-right.svg" alt="arrow" className="w-3 h-3 mx-1" />
-          <span>{event.toTime}</span>
-        </div>
+              {workWeekDays.map((day, colIdx) => (
+                <div
+                  key={`${day.toDateString()}-${hour}`}
+                  onClick={(e) => handleHourCellClick(day, hour, e)} // 👉 for empty cell
+                  className={`relative w-full h-full border-r border-gray-200 hover:bg-gray-100 ${colIdx === workWeekDays.length - 1 ? "last:border-r-0" : ""}`}
+                >
+                  {getEventsForDateAndHour(day, hour).map((event) => (
+                    <div
+                      key={event.id}
+                      onClick={(e) => handleHourCellClick(day, hour, e)} // 👉 for filled cell
+                      className="absolute inset-x-0 h-full top-0 rounded-lg px-3 py-2 text-sm flex flex-col border-4 shadow-sm cursor-pointer"
+                      style={{
+                        borderColor: event.colorBorder,
+                        backgroundColor: event.colorBg,
+                      }}
+                    >
+                      <div className="flex items-center justify-start gap-0 text-xs font-semibold text-gray-700 mb-1">
+                        <span>{event.fromTime}</span>
+                        <img src="/images/fi_arrow-right.svg" alt="arrow" className="w-3 h-3 mx-1" />
+                        <span>{event.toTime}</span>
+                      </div>
 
-        <div className="flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex items-center justify-center rounded-full text-[11px] text-white font-semibold w-6 h-6"
-              style={{ backgroundColor: event.colorBorder }}
-            >
-              {event.patientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
-            </div>
+                      <div className="flex items-center justify-between relative">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center justify-center rounded-full text-[11px] text-white font-semibold w-6 h-6"
+                            style={{ backgroundColor: event.colorBorder }}
+                          >
+                            {event.patientName.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                          </div>
 
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-              <span className="text-[6px] font-semibold text-gray-900">{event.visitType}</span>
-            </div>
-          </div>
-        </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
+                            <span className="text-[6px] font-semibold text-gray-900">{event.visitType}</span>
+                          </div>
+                        </div>
+                      </div>
 
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm">
-          <img
-            src={event.visitMode === "Online" ? "/images/fi_video.svg" : "/images/Frame (1).svg"}
-            alt="mode"
-            className="w-3.5 h-3.5"
-          />
-        </div>
-      </div>
-    ))}
-  </div>
-))}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm">
+                        <img
+                          src={event.visitMode === "Online" ? "/images/fi_video.svg" : "/images/Frame (1).svg"}
+                          alt="mode"
+                          className="w-3.5 h-3.5"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
 
             </div>
           ))}
@@ -552,6 +556,14 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
     }
   };
 
+  const handleAddAppointmentClick = () => {
+    setIsFromCellClick(false);
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setIsModalOpen(true);
+  };
+
+
   // ---- HEADER ----
   return (
     <div className="relative">
@@ -646,12 +658,12 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
 
 
       {selectedEvent && popupPosition && (
-            <Popup
-              event={selectedEvent}
-              position={popupPosition}
-              onClose={() => setSelectedEvent(null)}
-            />
-          )}
+        <Popup
+          event={selectedEvent}
+          position={popupPosition}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
 
 
       {isModalOpen && (
@@ -669,8 +681,8 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
               >
                 <AppointmentModal
                   onClose={handleCloseModal}
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
+                  selectedDate={isFromCellClick ? selectedDate : null}
+                  selectedTime={isFromCellClick ? selectedTime : null}
                 />
               </div>
             </div>
@@ -693,13 +705,6 @@ const handleHourCellClick = (date: Date, hour: number, e: React.MouseEvent) => {
             </div>
           )}
 
-          {/* {selectedEvent && popupPosition && (
-            <Popup
-              event={selectedEvent}
-              position={popupPosition}
-              onClose={() => setSelectedEvent(null)}
-            />
-          )} */}
 
         </>
       )}

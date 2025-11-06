@@ -17,13 +17,13 @@ interface Patient {
 
 interface AppointmentModalProps {
   onClose: () => void;
-   selectedDate: Date | null;
+  selectedDate: Date | null;
   selectedTime: string | null;
 }
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({ onClose, selectedTime, selectedDate }) => {
   const dispatch = useDispatch();
-  
+
   const [patientsList, setPatientsList] = useState<Patient[]>([
     { id: "PID158057", name: "John Doe", email: "john.doe@email.com" },
     { id: "PID158058", name: "Ananya Rao", email: "ananya.rao@email.com" },
@@ -43,22 +43,20 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({ onClose, selectedTi
     "bg-rose-200",
   ];
 
-  
-
-const [fromTime, setFromTime] = useState(selectedTime || "");
-const [toTime, setToTime] = useState(() => {
-  if (selectedTime) {
-    const [hour, minute] = selectedTime.split(":").map(Number);
-    const to = new Date();
-    to.setHours(hour, minute + 30, 0, 0);
-    return `${to.getHours().toString().padStart(2, "0")}:${to
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-  }
-  return "";
-});
-
+  const [fromTime, setFromTime] = useState(selectedTime ? selectedTime : "");
+  const [toTime, setToTime] = useState(() => {
+    if (selectedTime) {
+      const [hour, minute] = selectedTime.split(":").map(Number);
+      const to = new Date();
+      to.setHours(hour, minute + 30, 0, 0);
+      return `${to.getHours().toString().padStart(2, "0")}:${to
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    }
+    return "";
+  });
+  const [date, setDate] = useState<Date | null>(selectedDate ? selectedDate : null);
 
 
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -70,10 +68,7 @@ const [toTime, setToTime] = useState(() => {
   const [searchVisit, setSearchVisit] = useState("");
 
   const [visitMode, setVisitMode] = useState("Offline");
-  const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
-
-  const [date, setDate] = useState<Date | null>(selectedDate || new Date());
   const [isOpen, setIsOpen] = useState(false);
 
   const [fromHours, setFromHours] = useState("");
@@ -84,13 +79,7 @@ const [toTime, setToTime] = useState(() => {
   const [toMinutes, setToMinutes] = useState("");
   const [toAmpm, setToAmpm] = useState("AM");
 
-  const [patientName, setPatientName] = useState("");
-// const [selectedVisitType, setSelectedVisitType] = useState("");
-
-
-
-
-useEffect(() => {
+  useEffect(() => {
     if (selectedTime) {
       const [hour, minute] = selectedTime.split(":").map(Number);
       let fromHr = hour;
@@ -103,7 +92,7 @@ useEffect(() => {
         fromHr = 12;
       }
 
-      
+
       const toDate = new Date();
       toDate.setHours(hour);
       toDate.setMinutes(minute + 30);
@@ -124,12 +113,22 @@ useEffect(() => {
       setToHours(toHr.toString().padStart(2, "0"));
       setToMinutes(toMin.toString().padStart(2, "0"));
       setToAmpm(toAmPm);
+    } else {
+
+      setFromHours("");
+      setFromMinutes("");
+      setFromAmpm("AM")
+      setToHours("");
+      setToMinutes("");
+      setToAmpm("AM");
     }
   }, [selectedTime]);
 
   useEffect(() => {
-    if(selectedDate) {
+    if (selectedDate) {
       setDate(selectedDate);
+    } else {
+      setDate(null);
     }
   }, [selectedDate]);
 
@@ -163,10 +162,10 @@ useEffect(() => {
   );
 
   const getInitials = (name: string) => {
-  const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-};
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  };
 
 
 
@@ -197,36 +196,48 @@ useEffect(() => {
     "Medication Review Appointment": { border: "#EAB308", bg: "#FEF9C3" },
   };
 
+  const [appointmentDate, setAppointmentDate] = useState(
+    selectedDate || new Date()
+  );
+
   const handleAddAppointment = () => {
-  // if (!patientName || !selectedVisitType || !selectedDate || !fromTime || !toTime) {
-   if (!selectedPatient || !selectedVisit || !selectedDate) {
-    alert("Please fill all fields");
-    return;
-  }
+    const formatTime = (hours: string, minutes: string, ampm: string) => {
+      if (!hours || !minutes) return "";
+      let h = parseInt(hours);
+      if (ampm === "PM" && h < 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+      return `${h.toString().padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+    };
 
-const selectedColors =
-  visitTypeColors[selectedVisit] || { border: "#6B7280", bg: "#c4cddeff" };
+    const computedFromTime = formatTime(fromHours, fromMinutes, fromAmpm);
+    const computedToTime = formatTime(toHours, toMinutes, toAmpm);
 
-const initials = getInitials(patientName);
-const newEvent = {
-  id: uuidv4(),
-  patientName: selectedPatient?.name || "",
-  visitType: selectedVisit,
-  visitMode,
-  date: selectedDate?.toISOString(),
-  fromTime,
-  toTime,
-  reason,
-  color: selectedColors.border,
-  colorBorder: selectedColors.border,
-  colorBg: selectedColors.bg,
-  initials: getInitials(selectedPatient?.name || ""),
-};
+    if (!appointmentDate || !selectedPatient || !selectedVisit || !computedFromTime || !computedToTime) {
+      alert("Please fill all fields");
+      return;
+    }
 
-  // console.log("Dispatched Event:", newEvent);
-  dispatch(addEvent(newEvent));
-  onClose();
-};
+    const selectedColors =
+      visitTypeColors[selectedVisit] || { border: "#6B7280", bg: "#c4cddeff" };
+
+    const newEvent = {
+      id: uuidv4(),
+      patientName: selectedPatient.name,
+      visitType: selectedVisit,
+      visitMode,
+      date: appointmentDate.toISOString(),
+      fromTime: computedFromTime,
+      toTime: computedToTime,
+      reason,
+      color: selectedColors.border,
+      colorBorder: selectedColors.border,
+      colorBg: selectedColors.bg,
+      initials: getInitials(selectedPatient.name),
+    };
+
+    dispatch(addEvent(newEvent));
+    onClose();
+  };
 
 
   return (
@@ -417,7 +428,7 @@ const newEvent = {
                   onChange={() => setVisitMode("Online")}
                   className="text-blue-500 w-3.5 h-3.5 focus:ring-blue-400"
                 />
-                 {/* /<img src="/images/Frame (1).svg" alt="Offline" className="w-5 h-5" /> */}
+                {/* /<img src="/images/Frame (1).svg" alt="Offline" className="w-5 h-5" /> */}
                 <span>Online</span>
               </label>
             </div>
@@ -458,6 +469,7 @@ const newEvent = {
                     dateFormat="dd/MM/yy"
                     onClickOutside={() => setIsOpen(false)}
                   />
+
                 </div>
               )}
             </div>
@@ -605,3 +617,4 @@ const newEvent = {
 };
 
 export default AppointmentModal;
+
