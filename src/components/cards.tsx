@@ -1,80 +1,35 @@
 import React from "react";
+import { Card } from "react-bootstrap";
+import { cardStats } from "../utils/CardsConstants";
 
-interface CardProps {
-  title: string;
-  value: string | number;
-  percentage: string;
-  isPositive?: boolean;
-  bgColor: string;
-  icon: string;
-}
-
-const Card: React.FC<CardProps> = ({
-  title,
-  value,
-  percentage,
-  isPositive = true,
-  bgColor,
-  icon,
-}) => {
+const Cards = () => {
   return (
-    <div
-      className={`flex flex-col justify-between rounded-2xl shadow-md p-4 w-full min-w-[250px] min-h-[140px] text-white ${bgColor} snap-start`}
-    >
-     
-      <img src={icon} alt={title} className="w-10 h-10 object-contain mb-2" />
-
-      <p className="text-lg font-medium mt-10">{title}</p>
-
-      <div className="flex justify-between items-end mt-auto">
-        <p className="text-xl font-bold">{value}</p>
-        <p
-          className={`text-sm font-semibold ${
-            isPositive ? "text-green-100" : "text-red-200"
-          }`}
+    <div className="flex flex-wrap gap-4 w-full px-4">
+      {cardStats.map((stat, index) => (
+        <Card
+          key={index}
+          style={{
+            height: "104px",
+            backgroundColor: stat.bgColor,
+            borderRadius: "12px",
+          }}
+          className="text-white flex items-center justify-start flex-1 
+                     w-full sm:w-[48%] md:w-[32%] lg:w-[24%]"
         >
-          {percentage}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Cards: React.FC = () => {
-  return (
-    <div className="flex gap-4">
-      <Card
-        title="Enrolled Members"
-        value={1500}
-        percentage="+0.54%"
-        isPositive
-        icon="/images/enrolled.png"
-        bgColor="bg-purple-400"
-      />
-      <Card
-        title="Customers"
-        value={32300}
-        percentage="-13.66%"
-        isPositive={false}
-        icon="/images/customers.png"
-        bgColor="bg-blue-400"
-      />
-      <Card
-        title="Consumers"
-        value={15000}
-        percentage="+18.67%"
-        isPositive
-        icon="/images/consumers.png"
-        bgColor="bg-teal-400"
-      />
-      <Card
-        title="Total Claim Submissions"
-        value={234987}
-        percentage="+0.37%"
-        isPositive
-        icon="/images/claims.png"
-        bgColor="bg-pink-400"
-      />
+          <div className="flex items-center gap-4 p-4">
+            <div
+              className="flex items-center justify-center rounded-full w-16 h-16"
+              style={{ backgroundColor: stat.iconBg }}
+            >
+              {stat.icon}
+            </div>
+            <div>
+              <h5 className="text-white text-xl font-semibold">{stat.value}</h5>
+              <p className="text-white text-sm">{stat.title}</p>
+            </div>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 };

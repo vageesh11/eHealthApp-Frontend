@@ -1,84 +1,127 @@
-import React from "react";
+
+import React, { useState } from "react";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
   CartesianGrid,
+  ResponsiveContainer,
   Legend,
 } from "recharts";
+import Title from "./Title";
+import TimeFilter from "./Monthlydropdown";
+import {
+  monthlyData,
+  quarterlyData,
+  halfYearlyData,
+  yearlyData,
+  customData,
+} from "../utils/LinegraphConstants";
 
+const LineGraph: React.FC = () => {
+  const [filter, setFilter] = useState("Monthly");
 
-const data = [
-  { name: "Jan", claim1: 90, claim2: 50, claim3: 60 },
-  { name: "Feb", claim1: 50, claim2: 70, claim3: 30 },
-  { name: "Mar", claim1: 70, claim2: 90, claim3: 10 },
-  { name: "Apr", claim1: 60, claim2: 40, claim3: 60 },
-  { name: "May", claim1: 90, claim2: 90, claim3: 70 },
-];
+  const getData = () => {
+    switch (filter) {
+      case "Quarterly":
+        return quarterlyData;
+      case "Half-Yearly":
+        return halfYearlyData;
+      case "Yearly":
+        return yearlyData;
+      case "custom":
+        return customData;
+      default:
+        return monthlyData;
+    }
+  };
 
-
-const claims = [
-  { key: "claim1", label: "Claim Type 1", color: "#22c55e" }, 
-  { key: "claim2", label: "Claim Type 2", color: "#f97316" }, 
-  { key: "claim3", label: "Claim Type 3", color: "#3b82f6" }, 
-];
-
-
-const renderLegend = () => {
-  return (
-    <div className="flex justify-center gap-6 mb-2">
-      {claims.map((c) => (
-        <div key={c.key} className="flex items-center gap-1">
-          <span
-            className="w-4 h-2"
-            style={{ backgroundColor: c.color, border: `2px solid ${c.color}` }}
-          ></span>
-          <span>{c.label}</span>
-        </div>
-      ))}
+  const renderLegend = () => (
+    <div className="flex flex-wrap justify-center gap-4 sm:gap-6 pb-4 sm:pb-8 bg-transparent">
+      <div className="flex items-center gap-2">
+        <span className="w-4 h-4 rounded-md bg-blue-400"></span>
+        <span className="text-sm text-gray-700">Consultations</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-4 h-4 rounded-md bg-yellow-400"></span>
+        <span className="text-sm text-gray-700">Patients</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-4 h-4 rounded-md bg-purple-400"></span>
+        <span className="text-sm text-gray-700">New Patients</span>
+      </div>
     </div>
   );
-};
 
-
-const Linegraph: React.FC = () => {
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-2xl shadow p-4">
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-
-          
-          <Legend
-            content={renderLegend}
-            verticalAlign="top"
-            align="center"
+    <div className="flex flex-col sm:px-6  min-h-screen">
+      {/* Header: Title + Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-0 mb-4 ">
+        <div className="flex-1">
+          <Title
+            text="Patient Statistics"
+            subtitle="View your patient data over different time periods"
           />
+        </div>
+        <div className="w-full sm:w-[179px] mt-2 sm:mt-0">
+          <TimeFilter value={filter} onChange={setFilter} />
+        </div>
+      </div>
 
-          {claims.map((c) => (
-            <Line
-              key={c.key}
-              type="linear"   
-              dataKey={c.key}
-              stroke={c.color}
-              strokeWidth={2}
-              dot={{ r: 4 }}  
+      {/* Chart */}
+      <div className="  min-h-screen h-[250px] sm:h-[350px] md:h-[450px]  bg-white rounded-lg p-2 sm:p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={getData()}
+            margin={{ top: 20, right: 20, left: 0, bottom: 30 }}
+          >
+             <CartesianGrid strokeDasharray="3 3"/>
+            <XAxis dataKey="name" />
+            <YAxis ticks={[0, 10, 20, 30, 40, 50,  60, 70,  80, 90, 100]} domain={[0, 100]}
+            tickFormatter={(value) => (value % 20 === 0 ? value : "")}
+            tick = {{ fontSize:12}}
+            
             />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-
-      {/* <p className="text-sm text-gray-500 mt-2 text-center">
-        +10% from last month
-      </p> */}
+            <Tooltip />
+            <Legend
+              content={renderLegend}
+              verticalAlign="bottom"
+              align="center"
+              wrapperStyle={{
+                bottom: 0,
+                left: 0,
+                right: 0,
+                position: "absolute",
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="Consultations"
+              stroke="#60A5FA"
+              strokeWidth={2}
+              dot={{ r: 1 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="Patients"
+              stroke="#FBBF24"
+              strokeWidth={2}
+              dot={{ r: 1 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="NewPatients"
+              stroke="#C084FC"
+              strokeWidth={2}
+              dot={{ r: 1 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
 
-export default Linegraph;
+export default LineGraph;
